@@ -1,0 +1,17 @@
+# compiled output
+/bin
+/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+npm-debug.log
+yarn-error.log
+/typings
+/.scannerwork
