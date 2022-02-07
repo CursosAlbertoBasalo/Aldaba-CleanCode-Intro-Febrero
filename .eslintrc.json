@@ -13,43 +13,17 @@
   "env": {
     "browser": true,
     "es6": true,
-    "node": true,
+    "node": true
   },
   "globals": {},
   "rules": {
-    "complexity": [
-      "warn",
-      {
-        "max": 9
-      }
-    ],
     "curly": [
       "warn",
       "all"
     ],
-    "max-depth": [
-      "warn",
-      1
-    ],
     "max-lines": [
       "warn",
       99
-    ],
-    "max-lines-per-function": [
-      "warn",
-      9
-    ],
-    "max-statements": [
-      "warn",
-      9
-    ],
-    "max-nested-callbacks": [
-      "warn",
-      2
-    ],
-    "max-params": [
-      "warn",
-      1
     ],
     "no-magic-numbers": [
       "warn",
@@ -72,19 +46,65 @@
         "maxEOF": 1
       }
     ],
-    "no-nested-ternary": "warn",
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "default",
+        "format": [
+          "camelCase"
+        ]
+      },
+      {
+        "selector": "variable",
+        "format": [
+          "strictCamelCase"
+        ],
+        "leadingUnderscore": "forbid"
+      },
+      {
+        "selector": ["variable","parameter","property"],
+        "types": [
+          "boolean"
+        ],
+        "format": [
+          "strictCamelCase"
+        ],
+        "prefix": [
+          "is",
+          "should",
+          "has",
+          "can",
+          "did",
+          "will"
+        ]
+      },
+      {
+        "selector": "typeLike",
+        "format": [
+          "PascalCase"
+        ]
+      },
+      {
+        "selector": "enumMember",
+        "format": [
+          "strictCamelCase",
+          "UPPER_CASE"
+        ]
+      }
+    ],
     "prettier/prettier": [
       "warn",
       {
         "endOfLine": "auto"
       }
-    ],
-    "@typescript-eslint/no-unused-vars": "warn",
+    ]
   },
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module",
+    "project": "./tsconfig.json",
     "ecmaFeatures": {
       "modules": true
     }

@@ -1,31 +1,24 @@
 export enum BookingStatus {
-  REQUESTED,
-  PAID,
-  RESERVED,
-  BOOKING_NOTIFIED,
-  ANNULLED,
-  REFUNDED,
-  RELEASED,
-  ANNULATION_NOTIFIED,
-  CANCELLED,
-  CANCELLATION_NOTIFIED,
+  requested,
+  paid,
+  reserved,
+  notified,
 }
 
 export class Booking {
   id = "";
   tripId: string;
   travelerId: string;
-  passengersCount: number;
-  status: BookingStatus = BookingStatus.REQUESTED;
+  passengers: number;
+  status: BookingStatus = BookingStatus.requested;
   price: number;
   hasPremiumFoods = false;
-  extraLuggageKilos = 0;
+  extraLuggageInt = 0;
   operatorReserveCode: string;
   paymentId: string;
-  refundId: string;
   constructor(tripId: string, travelerId: string, passengersCount: number) {
     this.tripId = tripId;
     this.travelerId = travelerId;
-    this.passengersCount = passengersCount;
+    this.passengers = passengersCount;
   }
 }

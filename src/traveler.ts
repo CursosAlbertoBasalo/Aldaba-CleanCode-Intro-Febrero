@@ -1,12 +1,12 @@
 export class Traveler {
-  public id: string;
+  public id: string | undefined;
   public name: string;
   public email: string;
-  public isVIP: boolean;
+  public vipTraveler: boolean;
 
   constructor(name: string, email: string, isVIP = false) {
     this.name = name;
     this.email = email;
-    this.isVIP = isVIP;
+    this.vipTraveler = isVIP;
   }
 }

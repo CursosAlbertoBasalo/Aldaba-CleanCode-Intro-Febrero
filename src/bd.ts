@@ -1,13 +1,17 @@
 export class DB {
-  public static select<T>(query: string): T {
+  public static select<T>(query: string): T[] {
     console.log(query);
-    return undefined;
+    return [];
   }
-  public static insert<T>(dao: T): string {
+  public static findOne<T>(query: string): T {
+    console.log(query);
+    return {} as T;
+  }
+  public static post<T>(dao: T): string {
     console.log(dao);
     return Date.now().toString();
   }
-  public static update<T>(dao: T): number {
+  public static Update<T>(dao: T): number {
     console.log(dao);
     return 1;
   }

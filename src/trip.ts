@@ -1,28 +1,29 @@
 export enum TripKinds {
   TRIP_ONLY,
-  WITH_STAY,
+  with_Stay,
 }
 
 export enum TripStatus {
-  WAITING,
-  CANCELLED,
-  CONFIRMED,
-  NOTIFIED,
+  Waiting,
+  cancelled,
+  confirmed,
+  notified,
 }
 
 export class Trip {
   id = "";
   operatorId: string;
-  operatorTripCode: string;
+  operatorTripCode: string | undefined;
   destination: string;
   startDate: Date;
   endDate: Date;
   flightPrice: number;
-  stayingNightPrice: number;
-  kind: TripKinds = TripKinds.WITH_STAY;
-  status: TripStatus = TripStatus.WAITING;
-  extraLuggagePricePerKilo: number;
-  premiumFoodPrice: number;
+  stayingPrice: number;
+  kind: TripKinds = TripKinds.with_Stay;
+  status: TripStatus = TripStatus.Waiting;
+  luggagePrice = 0;
+  premiumFoodPrice = 0;
+  places: number;
 
   constructor(
     operatorId: string,
@@ -30,13 +31,15 @@ export class Trip {
     startDate: Date,
     endDate: Date,
     flightPrice: number,
-    stayingNightPrice = 0
+    stayingNightPrice = 0,
+    places = 0,
   ) {
     this.operatorId = operatorId;
     this.destination = destination;
     this.startDate = startDate;
     this.endDate = endDate;
     this.flightPrice = flightPrice;
-    this.stayingNightPrice = stayingNightPrice;
+    this.stayingPrice = stayingNightPrice;
+    this.places = places;
   }
 }
