@@ -8,11 +8,11 @@ export class DB {
     console.log(query);
     return {} as T;
   }
-  public static post<T>(dao: T): string {
+  public static insert<T>(dao: T): string {
     console.log(dao);
     return Date.now().toString();
   }
-  // 🧼 camelCase
+  // 🧼 camelCase consistent naming
   public static update<T>(dao: T): number {
     console.log(dao);
     return 1;

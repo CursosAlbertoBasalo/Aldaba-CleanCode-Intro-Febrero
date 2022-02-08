@@ -82,7 +82,7 @@ export class Bookings {
   }
   // 🧼 remove redundant comments and words
   private save() {
-    this.booking.id = DB.post<Booking>(this.booking);
+    this.booking.id = DB.insert<Booking>(this.booking);
   }
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
