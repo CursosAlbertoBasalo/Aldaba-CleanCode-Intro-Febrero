@@ -5,7 +5,7 @@ import { Trip } from "./trip";
 // 🧼 PascalCase
 export class Bookings {
   private booking!: Booking;
-  private travel!: Trip;
+  private trip!: Trip; // 🧼 consistent naming
 
   /**
    * Requests a new booking
@@ -73,9 +73,9 @@ export class Bookings {
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
-    this.travel = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
     // 🧼 flags should start with flag verbs
-    const hasAvailableSeats = this.travel.availablePlaces >= passengersCount;
+    const hasAvailableSeats = this.trip.availablePlaces >= passengersCount;
     if (!hasAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
@@ -101,17 +101,15 @@ export class Bookings {
     const hoursPerDay = 24;
     // 🧼 use a consistent name pattern
     const millisecondsPerDay = millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay;
-    const stayingDays = Math.round(
-      this.travel.endDate.getTime() - this.travel.startDate.getTime() / millisecondsPerDay,
-    );
+    const stayingNights = Math.round(this.trip.endDate.getTime() - this.trip.startDate.getTime() / millisecondsPerDay);
     // Calculate staying price
-    const stayingPrice = stayingDays * this.travel.stayingNightPrice;
+    const stayingPrice = stayingNights * this.trip.stayingNightPrice;
     // Calculate flight price
-    const flightPrice = this.travel.flightPrice + (this.booking.hasPremiumFoods ? this.travel.premiumFoodPrice : 0);
-    const tripPrice = flightPrice + stayingPrice;
-    const passengersPrice = tripPrice * this.booking.passengersCount;
+    const flightPrice = this.trip.flightPrice + (this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0);
+    const passengerPrice = flightPrice + stayingPrice;
+    const passengersPrice = passengerPrice * this.booking.passengersCount;
     // Calculate luggage price for all passengers of the booking
-    const extraPrice = this.booking.extraLuggageKilos * this.travel.extraLuggagePricePerKilo;
-    return passengersPrice + extraPrice;
+    const extraTripPrice = this.booking.extraLuggageKilos * this.trip.extraLuggagePricePerKilo;
+    return passengersPrice + extraTripPrice;
   }
 }
