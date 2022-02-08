@@ -16,7 +16,7 @@ export class Bookings {
    * @param {string} cardExpiry - the card expiry date
    * @param {string} cardCVC - the card CVC
    * @param {boolean} hasPremiumFoods - if the traveler has premium foods
-   * @param {number} luggage - the number of extra luggage kilos
+   * @param {number} extraLuggageKilos - the number of extra luggage kilos
    * @returns {Booking} the new booking object
    * @throws {Error} if the booking is not possible
    */
@@ -28,9 +28,9 @@ export class Bookings {
     cardExpiry: string, // 🧼 coherent name
     cardCVC: string,
     hasPremiumFoods: boolean, // 🧼 boolean flags
-    luggage: number,
+    extraLuggageKilos: number,
   ): Booking {
-    this.create(travelerId, tripId, passengersCount, hasPremiumFoods, luggage);
+    this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
     // 🧼 remove empty line
     this.save();
     this.pay(cardNumber, cardExpiry, cardCVC);
