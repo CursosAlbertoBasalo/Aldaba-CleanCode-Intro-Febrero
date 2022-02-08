@@ -6,10 +6,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": [
-    "prettier",
-    "@typescript-eslint"
-  ],
+  "plugins": ["prettier", "@typescript-eslint"],
   "env": {
     "browser": true,
     "es6": true,
@@ -17,21 +14,13 @@
   },
   "globals": {},
   "rules": {
-    "curly": [
-      "warn",
-      "all"
-    ],
+    "curly": ["warn", "all"],
     "no-magic-numbers": [
       "warn",
       {
         "detectObjects": false,
         "enforceConst": true,
-        "ignore": [
-          -1,
-          0,
-          1,
-          2
-        ],
+        "ignore": [-1, 0, 1, 2],
         "ignoreArrayIndexes": true
       }
     ],
@@ -48,45 +37,104 @@
       "warn",
       {
         "selector": "default",
-        "format": [
-          "camelCase"
-        ]
-      },
-      {
-        "selector": "variable",
-        "format": [
-          "strictCamelCase"
-        ],
+        "format": ["camelCase"],
         "leadingUnderscore": "forbid"
       },
       {
-        "selector": ["variable","parameter","property"],
-        "types": [
-          "boolean"
-        ],
-        "format": [
-          "PascalCase"
-        ],
-        "prefix": [
-          "is",
-          "should",
-          "has",
-          "can",
-          "did",
-          "will"
-        ]
-      },
-      {
         "selector": "typeLike",
-        "format": [
-          "PascalCase"
-        ]
+        "format": ["PascalCase"]
       },
       {
         "selector": "enumMember",
-        "format": [
-          "strictCamelCase",
-          "UPPER_CASE"
+        "format": ["UPPER_CASE"]
+      },
+      {
+        "selector": ["memberLike","variableLike"],
+        "types": ["boolean"],
+        "format": ["PascalCase"],
+        "prefix": ["can", "did", "has", "is", "must", "should", "will"]
+      },
+      {
+        "selector": ["memberLike","variableLike"],
+        "types": ["array"],
+        "format": ["camelCase"],
+        "custom": {
+          "match": true,
+          "regex": "[s|List]$"
+        }
+      },
+      {
+        "selector": ["function", "method"],
+        "format": ["PascalCase"],
+        "prefix": [
+          "add",
+          "are",
+          "assert",
+          "assign",
+          "build",
+          "can",
+          "check",
+          "calculate",
+          "concat",
+          "create",
+          "delete",
+          "describe",
+          "destroy",
+          "disable",
+          "divide",
+          "do",
+          "does",
+          "did",
+          "enable",
+          "execute",
+          "find",
+          "finish",
+          "fix",
+          "get",
+          "grant",
+          "handle",
+          "has",
+          "initialize",
+          "insert",
+          "is",
+          "list",
+          "make",
+          "merge",
+          "mount",
+          "multiply",
+          "onChange",
+          "onError",
+          "onInit",
+          "onSuccess",
+          "parse",
+          "pay",
+          "post",
+          "put",
+          "request",
+          "refund",
+          "register",
+          "remove",
+          "run",
+          "save",
+          "search",
+          "select",
+          "send",
+          "set",
+          "should",
+          "sort",
+          "split",
+          "start",
+          "strip",
+          "subtract",
+          "sum",
+          "take",
+          "test",
+          "throw",
+          "transform",
+          "update",
+          "validate",
+          "verify",
+          "warn"
         ]
       }
     ],
