@@ -21,10 +21,6 @@
       "warn",
       "all"
     ],
-    "max-lines": [
-      "warn",
-      99
-    ],
     "no-magic-numbers": [
       "warn",
       {

@@ -11,19 +11,19 @@ export enum TripStatus {
 }
 
 export class Trip {
-  id = "";
-  operatorId: string;
-  operatorTripCode: string | undefined;
-  destination: string;
-  startDate: Date;
-  endDate: Date;
-  flightPrice: number;
-  stayingPrice: number;
-  kind: TripKinds = TripKinds.with_Stay;
-  status: TripStatus = TripStatus.Waiting;
-  luggagePrice = 0;
-  premiumFoodPrice = 0;
-  places: number;
+  public id: string | undefined;
+  public operatorId: string;
+  public operatorTripCode: string | undefined;
+  public destination: string;
+  public startDate: Date;
+  public endDate: Date;
+  public flightPrice: number;
+  public stayingPrice: number;
+  public kind: TripKinds = TripKinds.with_Stay;
+  public status: TripStatus = TripStatus.Waiting;
+  public luggagePrice = 0;
+  public premiumFoodPrice = 0;
+  public places: number;
 
   constructor(
     operatorId: string,

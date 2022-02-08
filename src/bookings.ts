@@ -19,7 +19,7 @@ export class bookings {
    * @param {number} luggage - the number of extra luggage kilos
    * @returns {Booking} the new booking object
    * @throws {Error} if the booking is not possible
-   * */
+   */
   public request(
     travelerId: string,
     trip_Id: string,
@@ -37,6 +37,9 @@ export class bookings {
     return this.booking;
   }
 
+  /**
+   * Creates a new booking
+   */
   private newBooking(
     travelerId: string,
     tripId: string,
@@ -54,6 +57,7 @@ export class bookings {
     if (passengersCount > 6) {
       throw new Error("Nobody can't have more than 6 passengers");
     }
+    // Check for passengers that ar not VIP
     if (this.forNormal(traveler_Code) && passengersCount > 4) {
       throw new Error("No vip can't have more than 4 passengers");
     }
@@ -71,15 +75,16 @@ export class bookings {
     this.travel = DB.findOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
     const seats = this.travel.places >= passengersCount;
     if (!seats) {
-      throw new Error("The trip is not available");
+      throw new Error("There are no seats available in the trip");
     }
   }
+  /** Save booking */
   private saveBooking() {
     this.booking.id = DB.post<Booking>(this.booking);
   }
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.price();
-    // To Do: Pay with card
+    // To Do: Call a Payment gateway to pay with card info
     console.log(`Paying ${this.booking.price} with ${cardNumber} and ${cardExpiry} and ${cardCVC}`);
     this.booking.paymentId = "payment fake identification";
     this.booking.status = BookingStatus.paid;
