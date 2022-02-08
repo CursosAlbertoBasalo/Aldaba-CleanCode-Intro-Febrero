@@ -5,7 +5,7 @@ import { Trip } from "./trip";
 
 export class Bookings {
   private booking!: Booking;
-  private travel!: Trip;
+  private trip!: Trip;
 
   /**
    * Requests a new booking
@@ -51,12 +51,11 @@ export class Bookings {
   }
 
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
-    const maxPassengersCount = 6; // 🧼 remove magic number
+    const maxPassengersCount = 6;
     if (passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
-    // 🧼 remove comments by using clear names
-    const maxNonVipPassengersCount = 4; // 🧼 remove magic number
+    const maxNonVipPassengersCount = 4;
     if (this.isNonVip(travelerId) && passengersCount > maxNonVipPassengersCount) {
       throw new Error(`No VIPs cant't have more than ${maxNonVipPassengersCount} passengers`);
     }
@@ -72,8 +71,8 @@ export class Bookings {
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
-    this.travel = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
-    const hasAvailableSeats = this.travel.availablePlaces >= passengersCount;
+    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    const hasAvailableSeats = this.trip.availablePlaces >= passengersCount;
     if (!hasAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
@@ -97,16 +96,17 @@ export class Bookings {
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
     const hoursPerDay = 24;
+
     const millisecondsPerDay = millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay;
-    const stayingDays = Math.round(
-      this.travel.endDate.getTime() - this.travel.startDate.getTime() / millisecondsPerDay,
-    );
-    const stayingPrice = stayingDays * this.travel.stayingNightPrice;
-    const flightPrice = this.travel.flightPrice + (this.booking.hasPremiumFoods ? this.travel.premiumFoodPrice : 0);
-    const tripPrice = flightPrice + stayingPrice;
-    const passengersPrice = tripPrice * this.booking.passengersCount;
-    // Calculate luggage price for all passengers of the booking
-    const extraPrice = this.booking.extraLuggageKilos * this.travel.extraLuggagePricePerKilo;
-    return passengersPrice + extraPrice;
+    const stayingNights = Math.round(this.trip.endDate.getTime() - this.trip.startDate.getTime() / millisecondsPerDay);
+    // Calculate staying price
+    const stayingPrice = stayingNights * this.trip.stayingNightPrice;
+    // Calculate flight price
+    const flightPrice = this.trip.flightPrice + (this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0);
+    const passengerPrice = flightPrice + stayingPrice;
+    const passengersPrice = passengerPrice * this.booking.passengersCount;
+    // Calculate extra price once for all passengers of the booking
+    const extraTripPrice = this.booking.extraLuggageKilos * this.trip.extraLuggagePricePerKilo;
+    return passengersPrice + extraTripPrice;
   }
 }
