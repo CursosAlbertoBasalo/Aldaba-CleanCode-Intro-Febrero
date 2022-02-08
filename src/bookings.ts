@@ -1,5 +1,5 @@
-import { DB } from "./bd";
 import { Booking, BookingStatus } from "./booking";
+import { DB } from "./db";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 // 🧼 PascalCase
