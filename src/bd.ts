@@ -3,7 +3,8 @@ export class DB {
     console.log(query);
     return [];
   }
-  public static findOne<T>(query: string): T {
+  // 🧼 same family of methods for all DAOs
+  public static selectOne<T>(query: string): T {
     console.log(query);
     return {} as T;
   }
@@ -11,7 +12,8 @@ export class DB {
     console.log(dao);
     return Date.now().toString();
   }
-  public static Update<T>(dao: T): number {
+  // 🧼 camelCase
+  public static update<T>(dao: T): number {
     console.log(dao);
     return 1;
   }

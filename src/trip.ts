@@ -1,15 +1,17 @@
+// 🧼 camelCase
 export enum TripKinds {
-  TRIP_ONLY,
-  with_Stay,
+  tripOnly,
+  withStay,
 }
 
 export enum TripStatus {
-  Waiting,
+  waiting,
   cancelled,
   confirmed,
   notified,
 }
 
+// 🧼 consisten and explicit naming
 export class Trip {
   public id: string | undefined;
   public operatorId: string;
@@ -18,12 +20,12 @@ export class Trip {
   public startDate: Date;
   public endDate: Date;
   public flightPrice: number;
-  public stayingPrice: number;
-  public kind: TripKinds = TripKinds.with_Stay;
-  public status: TripStatus = TripStatus.Waiting;
-  public luggagePrice = 0;
+  public stayingNightPrice: number;
+  public kind: TripKinds = TripKinds.withStay;
+  public status: TripStatus = TripStatus.waiting;
+  public extraLuggagePricePerKilo = 0;
   public premiumFoodPrice = 0;
-  public places: number;
+  public availablePlaces: number;
 
   constructor(
     operatorId: string,
@@ -39,7 +41,7 @@ export class Trip {
     this.startDate = startDate;
     this.endDate = endDate;
     this.flightPrice = flightPrice;
-    this.stayingPrice = stayingNightPrice;
-    this.places = places;
+    this.stayingNightPrice = stayingNightPrice;
+    this.availablePlaces = places;
   }
 }

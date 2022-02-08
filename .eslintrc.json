@@ -65,7 +65,7 @@
           "boolean"
         ],
         "format": [
-          "strictCamelCase"
+          "PascalCase"
         ],
         "prefix": [
           "is",
