@@ -48,7 +48,7 @@ export class Bookings {
     this.checkAvailability(tripId, passengersCount);
     this.booking = new Booking(tripId, travelerId, passengersCount);
     this.booking.hasPremiumFoods = hasPremiumFoods;
-    this.booking.extraLuggagePricePerKilo = extraLuggageKilos;
+    this.booking.extraLuggageKilos = extraLuggageKilos;
   }
   // 🧼 start with get and express the intention and use consistent naming for parameters
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
@@ -89,7 +89,7 @@ export class Bookings {
     // To Do: Call a Payment gateway to pay with card info
     console.log(`Paying ${this.booking.price} with ${cardNumber} and ${cardExpiry} and ${cardCVC}`);
     this.booking.paymentId = "payment fake identification";
-    this.booking.status = BookingStatus.paid;
+    this.booking.status = BookingStatus.PAID;
     DB.update(this.booking);
   }
   // 🧼 use verbs to clarify intention
@@ -111,7 +111,7 @@ export class Bookings {
     const tripPrice = flightPrice + stayingPrice;
     const passengersPrice = tripPrice * this.booking.passengersCount;
     // Calculate luggage price for all passengers of the booking
-    const extraPrice = this.booking.extraLuggagePricePerKilo * this.travel.extraLuggagePricePerKilo;
+    const extraPrice = this.booking.extraLuggageKilos * this.travel.extraLuggagePricePerKilo;
     return passengersPrice + extraPrice;
   }
 }
