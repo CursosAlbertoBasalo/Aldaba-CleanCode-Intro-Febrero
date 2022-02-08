@@ -1,4 +1,3 @@
-// 🧼 PascalCase
 export enum TripKinds {
   TRIP_ONLY,
   WITH_STAY,
@@ -10,7 +9,6 @@ export enum TripStatus {
   CONFIRMED,
 }
 
-// 🧼 consisten and explicit naming
 export class Trip {
   public id: string | undefined;
   public operatorId: string;

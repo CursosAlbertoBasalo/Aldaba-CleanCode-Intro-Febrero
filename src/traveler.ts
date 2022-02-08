@@ -2,7 +2,7 @@ export class Traveler {
   public id: string | undefined;
   public name: string;
   public email: string;
-  public isVip: boolean; // 🧼 camelCase, flags boolean, non redundant name
+  public isVip: boolean;
 
   constructor(name: string, email: string, isVIP = false) {
     this.name = name;

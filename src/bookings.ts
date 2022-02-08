@@ -2,7 +2,7 @@ import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
-// 🧼 PascalCase
+
 export class Bookings {
   private booking!: Booking;
   private travel!: Trip;
@@ -22,21 +22,20 @@ export class Bookings {
    */
   public request(
     travelerId: string,
-    tripId: string, // 🧼 camelCase
-    passengersCount: number, // 🧼 distinction between a list and a value
+    tripId: string,
+    passengersCount: number,
     cardNumber: string,
-    cardExpiry: string, // 🧼 coherent name
+    cardExpiry: string,
     cardCVC: string,
-    hasPremiumFoods: boolean, // 🧼 boolean flags
+    hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
     this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
-    // 🧼 remove empty line
     this.save();
     this.pay(cardNumber, cardExpiry, cardCVC);
     return this.booking;
   }
-  // 🧼 clear intention, non redundant name, no comment
+
   private create(
     travelerId: string,
     tripId: string,
@@ -50,7 +49,7 @@ export class Bookings {
     this.booking.hasPremiumFoods = hasPremiumFoods;
     this.booking.extraLuggageKilos = extraLuggageKilos;
   }
-  // 🧼 start with get and express the intention and use consistent naming for parameters
+
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
     const maxPassengersCount = 6; // 🧼 remove magic number
     if (passengersCount > maxPassengersCount) {
@@ -66,7 +65,7 @@ export class Bookings {
     }
     return passengersCount;
   }
-  // 🧼 boolean verbs should start with flags
+
   private isNonVip(travelerId: string): boolean {
     const theTraveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
     return theTraveler.isVip;
@@ -74,16 +73,16 @@ export class Bookings {
 
   private checkAvailability(tripId: string, passengersCount: number) {
     this.travel = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
-    // 🧼 flags should start with flag verbs
     const hasAvailableSeats = this.travel.availablePlaces >= passengersCount;
     if (!hasAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
   }
-  // 🧼 remove redundant comments and words
+
   private save() {
     this.booking.id = DB.insert<Booking>(this.booking);
   }
+
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
     // To Do: Call a Payment gateway to pay with card info
@@ -92,21 +91,17 @@ export class Bookings {
     this.booking.status = BookingStatus.PAID;
     DB.update(this.booking);
   }
-  // 🧼 use verbs to clarify intention
+
   private calculatePrice(): number {
-    // 🧼 remove magic number
     const millisecondsPerSecond = 1000;
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
     const hoursPerDay = 24;
-    // 🧼 use a consistent name pattern
     const millisecondsPerDay = millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay;
     const stayingDays = Math.round(
       this.travel.endDate.getTime() - this.travel.startDate.getTime() / millisecondsPerDay,
     );
-    // Calculate staying price
     const stayingPrice = stayingDays * this.travel.stayingNightPrice;
-    // Calculate flight price
     const flightPrice = this.travel.flightPrice + (this.booking.hasPremiumFoods ? this.travel.premiumFoodPrice : 0);
     const tripPrice = flightPrice + stayingPrice;
     const passengersPrice = tripPrice * this.booking.passengersCount;
