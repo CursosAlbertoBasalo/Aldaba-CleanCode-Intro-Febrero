@@ -16,6 +16,12 @@
 
 > Instructions, blocks and structures
 
+### 2.1.- Simple instructions
+
+### 2.2.- Small blocks
+
+### 2.3.- Plain structure
+
 ## 3.- DATA
 
 > Classes and Data Structures
