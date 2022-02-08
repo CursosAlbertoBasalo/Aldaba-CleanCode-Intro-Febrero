@@ -60,12 +60,16 @@
         "leadingUnderscore": "forbid"
       },
       {
-        "selector": ["variable","parameter","property"],
+        "selector": [
+          "variable",
+          "parameter",
+          "property"
+        ],
         "types": [
           "boolean"
         ],
         "format": [
-          "strictCamelCase"
+          "PascalCase"
         ],
         "prefix": [
           "is",
