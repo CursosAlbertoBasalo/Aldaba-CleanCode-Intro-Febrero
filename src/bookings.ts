@@ -1,11 +1,16 @@
+/* eslint-disable max-statements */
+/* eslint-disable max-lines-per-function */
 import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
+import { PaymentMethod, Payments } from "./payments";
+import { SMTP } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 
 export class Bookings {
   private booking!: Booking;
   private trip!: Trip;
+  private traveler!: Traveler;
 
   /**
    * Requests a new booking
@@ -66,8 +71,8 @@ export class Bookings {
   }
 
   private isNonVip(travelerId: string): boolean {
-    const theTraveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
-    return theTraveler.isVip;
+    this.traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
+    return this.traveler.isVip;
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
@@ -84,10 +89,30 @@ export class Bookings {
 
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
-    // To Do: Call a Payment gateway to pay with card info
-    console.log(`Paying ${this.booking.price} with ${cardNumber} and ${cardExpiry} and ${cardCVC}`);
-    this.booking.paymentId = "payment fake identification";
-    this.booking.status = BookingStatus.PAID;
+    const payments = new Payments();
+    const paymentId = payments.payBooking(
+      this.booking,
+      PaymentMethod.CREDIT_CARD,
+      cardNumber,
+      cardExpiry,
+      cardCVC,
+      "",
+      "",
+      "",
+    );
+    if (paymentId != "") {
+      this.booking.paymentId = "payment fake identification";
+      this.booking.status = BookingStatus.PAID;
+    } else {
+      this.booking.status = BookingStatus.ERROR;
+      const smtp = new SMTP();
+      smtp.sendMail(
+        "payments@astrobookings.com",
+        this.traveler.email,
+        "Payment error",
+        `Using card ${cardNumber} amounting to ${this.booking.price}`,
+      );
+    }
     DB.update(this.booking);
   }
 
