@@ -65,7 +65,7 @@
         "selector": ["memberLike","variableLike"],
         "types": ["boolean"],
         "format": ["PascalCase"],
-        "prefix": ["can", "did", "has", "is", "must", "should", "will"]
+        "prefix": ["can", "did", "has", "is", "must", "needs", "should", "will"]
       },
       {
         "selector": ["memberLike","variableLike"],

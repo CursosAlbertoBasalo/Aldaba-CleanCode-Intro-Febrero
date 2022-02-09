@@ -35,10 +35,18 @@ export class Bookings {
     hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
-    this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
-    this.save();
-    this.pay(cardNumber, cardExpiry, cardCVC);
-    return this.booking;
+    if (travelerId && tripId) {
+      this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
+      this.save();
+      if (cardNumber && cardExpiry && cardCVC) {
+        this.pay(cardNumber, cardExpiry, cardCVC);
+      } else {
+        this.booking.status = BookingStatus.PENDING;
+      }
+      return this.booking;
+    } else {
+      throw new Error("Invalid parameters");
+    }
   }
 
   private create(
