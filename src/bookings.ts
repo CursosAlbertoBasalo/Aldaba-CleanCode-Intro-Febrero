@@ -36,10 +36,12 @@ export class Bookings {
     hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
-    if (travelerId && tripId) {
+    // 🧼 conditional validation on functions
+    if (this.hasEntitiesId(travelerId, tripId)) {
       this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
       this.save();
-      if (cardNumber && cardExpiry && cardCVC) {
+      // 🧼 conditional validation on functions
+      if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
         this.pay(cardNumber, cardExpiry, cardCVC);
       } else {
         this.booking.status = BookingStatus.ERROR;
@@ -48,6 +50,14 @@ export class Bookings {
     } else {
       throw new Error("Invalid parameters");
     }
+  }
+
+  private hasEntitiesId(travelerId: string, tripId: string) {
+    return travelerId && tripId;
+  }
+
+  private hasCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
+    return cardNumber && cardExpiry && cardCVC;
   }
 
   private create(
@@ -70,13 +80,20 @@ export class Bookings {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
     const maxNonVipPassengersCount = 4;
-    if (this.isNonVip(travelerId) && passengersCount > maxNonVipPassengersCount) {
+    // 🧼 conditional validation on functions
+    if (this.hasTooManyPassengersForVip(travelerId, passengersCount, maxNonVipPassengersCount)) {
       throw new Error(`No VIPs cant't have more than ${maxNonVipPassengersCount} passengers`);
     }
     if (passengersCount <= 0) {
       passengersCount = 1;
     }
     return passengersCount;
+  }
+
+  private hasTooManyPassengersForVip(travelerId: string, passengersCount: number, maxNonVipPassengersCount: number) {
+    // 🧼 one operator per statement
+    const isTooMuchForNonVip = passengersCount > maxNonVipPassengersCount;
+    return this.isNonVip(travelerId) && isTooMuchForNonVip;
   }
 
   private isNonVip(travelerId: string): boolean {
@@ -130,13 +147,18 @@ export class Bookings {
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
     const hoursPerDay = 24;
-
-    const millisecondsPerDay = millisecondsPerSecond * secondsPerMinute * minutesPerHour * hoursPerDay;
-    const stayingNights = Math.round(this.trip.endDate.getTime() - this.trip.startDate.getTime() / millisecondsPerDay);
+    // 🧼 one operator per statement
+    const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
+    const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
+    const millisecondsPerDay = millisecondsPerHour * hoursPerDay;
+    const millisecondsTripDuration = this.trip.endDate.getTime() - this.trip.startDate.getTime();
+    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
+    const stayingNights = Math.round(rawStayingNights);
     // Calculate staying price
     const stayingPrice = stayingNights * this.trip.stayingNightPrice;
+    const premiumFoodsPrice = this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0;
     // Calculate flight price
-    const flightPrice = this.trip.flightPrice + (this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0);
+    const flightPrice = this.trip.flightPrice + premiumFoodsPrice;
     const passengerPrice = flightPrice + stayingPrice;
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     // Calculate extra price once for all passengers of the booking
