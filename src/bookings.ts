@@ -1,6 +1,3 @@
-/* eslint-disable max-depth */
-/* eslint-disable max-statements */
-/* eslint-disable max-lines-per-function */
 import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
 import { PaymentMethod, Payments } from "./payments";
@@ -36,28 +33,33 @@ export class Bookings {
     hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
+    // 🧼 early return
     // 🧼 conditional validation on functions
-    if (this.hasEntitiesId(travelerId, tripId)) {
-      this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
-      this.save();
-      // 🧼 conditional validation on functions
-      if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
-        this.pay(cardNumber, cardExpiry, cardCVC);
-      } else {
-        this.booking.status = BookingStatus.ERROR;
-      }
-      return this.booking;
-    } else {
+    if (this.hasEntitiesId(travelerId, tripId) === false) {
       throw new Error("Invalid parameters");
+    }
+    this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
+    this.save();
+    // 🧼 one condition per function
+    this.pay(cardNumber, cardExpiry, cardCVC);
+    return this.booking;
+  }
+
+  private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
+    // 🧼 conditional validation on functions
+    if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
+      this.payWithCreditCard(cardNumber, cardExpiry, cardCVC);
+    } else {
+      this.booking.status = BookingStatus.ERROR;
     }
   }
 
-  private hasEntitiesId(travelerId: string, tripId: string) {
-    return travelerId && tripId;
+  private hasEntitiesId(travelerId: string, tripId: string): boolean {
+    return travelerId !== "" && tripId !== "";
   }
 
-  private hasCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
-    return cardNumber && cardExpiry && cardCVC;
+  private hasCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string): boolean {
+    return cardNumber !== "" && cardExpiry !== "" && cardCVC !== "";
   }
 
   private create(
@@ -75,6 +77,7 @@ export class Bookings {
   }
 
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
+    // To Do: clean pending...
     const maxPassengersCount = 6;
     if (passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
@@ -113,8 +116,19 @@ export class Bookings {
     this.booking.id = DB.insert<Booking>(this.booking);
   }
 
-  private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
+  private payWithCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
+    const paymentId = this.payPriceWithCard(cardNumber, cardExpiry, cardCVC);
+    // 🧼 conditional blocks on functions
+    if (paymentId != "") {
+      this.setPaymentStatus();
+    } else {
+      this.processNonPayedBooking(cardNumber);
+    }
+    DB.update(this.booking);
+  }
+
+  private payPriceWithCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
     const payments = new Payments();
     const paymentId = payments.payBooking(
       this.booking,
@@ -126,23 +140,56 @@ export class Bookings {
       "",
       "",
     );
-    if (paymentId != "") {
-      this.booking.paymentId = "payment fake identification";
-      this.booking.status = BookingStatus.PAID;
-    } else {
-      this.booking.status = BookingStatus.ERROR;
-      const smtp = new SMTP();
-      smtp.sendMail(
-        "payments@astrobookings.com",
-        this.traveler.email,
-        "Payment error",
-        `Using card ${cardNumber} amounting to ${this.booking.price}`,
-      );
-    }
-    DB.update(this.booking);
+    return paymentId;
+  }
+
+  private processNonPayedBooking(cardNumber: string) {
+    this.booking.status = BookingStatus.ERROR;
+    const smtp = new SMTP();
+    smtp.sendMail(
+      "payments@astrobookings.com",
+      this.traveler.email,
+      "Payment error",
+      `Using card ${cardNumber} amounting to ${this.booking.price}`,
+    );
+  }
+
+  private setPaymentStatus() {
+    this.booking.paymentId = "payment fake identification";
+    this.booking.status = BookingStatus.PAID;
   }
 
   private calculatePrice(): number {
+    // 🧼 large process divided in small ones
+    const millisecondsPerDay = this.calculateMillisecondsPerDay();
+    const stayingNights = this.calculateStayingNights(millisecondsPerDay);
+
+    const passengerPrice = this.calculatePassengerPrice(stayingNights);
+    const passengersPrice = passengerPrice * this.booking.passengersCount;
+    const extraTripPrice = this.calculateExtraPricePerTrip();
+    return passengersPrice + extraTripPrice;
+  }
+
+  private calculateExtraPricePerTrip() {
+    return this.booking.extraLuggageKilos * this.trip.extraLuggagePricePerKilo;
+  }
+
+  private calculatePassengerPrice(stayingNights: number) {
+    const stayingPrice = stayingNights * this.trip.stayingNightPrice;
+    const premiumFoodsPrice = this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0;
+    const flightPrice = this.trip.flightPrice + premiumFoodsPrice;
+    const passengerPrice = flightPrice + stayingPrice;
+    return passengerPrice;
+  }
+
+  private calculateStayingNights(millisecondsPerDay: number) {
+    const millisecondsTripDuration = this.trip.endDate.getTime() - this.trip.startDate.getTime();
+    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
+    const stayingNights = Math.round(rawStayingNights);
+    return stayingNights;
+  }
+
+  private calculateMillisecondsPerDay() {
     const millisecondsPerSecond = 1000;
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
@@ -151,18 +198,6 @@ export class Bookings {
     const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
     const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
     const millisecondsPerDay = millisecondsPerHour * hoursPerDay;
-    const millisecondsTripDuration = this.trip.endDate.getTime() - this.trip.startDate.getTime();
-    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
-    const stayingNights = Math.round(rawStayingNights);
-    // Calculate staying price
-    const stayingPrice = stayingNights * this.trip.stayingNightPrice;
-    const premiumFoodsPrice = this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0;
-    // Calculate flight price
-    const flightPrice = this.trip.flightPrice + premiumFoodsPrice;
-    const passengerPrice = flightPrice + stayingPrice;
-    const passengersPrice = passengerPrice * this.booking.passengersCount;
-    // Calculate extra price once for all passengers of the booking
-    const extraTripPrice = this.booking.extraLuggageKilos * this.trip.extraLuggagePricePerKilo;
-    return passengersPrice + extraTripPrice;
+    return millisecondsPerDay;
   }
 }
