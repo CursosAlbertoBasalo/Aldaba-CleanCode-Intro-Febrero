@@ -19,14 +19,15 @@ export class SMTP {
   }
 
   private sendMailWithSMTP(needsSecurity: boolean): string {
+    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
     if (needsSecurity) {
       console.log(
         `Using ${this.smtpServer} port ${this.smtpSecurePort} user ${this.smtpUser} password ${this.smtpPassword}`,
       );
+      return "250 OK";
     } else {
       console.log(`Using ${this.smtpServer} port ${this.smtpPort}`);
+      return "250 OK";
     }
-    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
-    return "250 OK";
   }
 }

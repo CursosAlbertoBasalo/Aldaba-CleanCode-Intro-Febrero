@@ -1,3 +1,4 @@
+/* eslint-disable max-depth */
 /* eslint-disable max-statements */
 /* eslint-disable max-lines-per-function */
 import { Booking, BookingStatus } from "./booking";
@@ -41,7 +42,7 @@ export class Bookings {
       if (cardNumber && cardExpiry && cardCVC) {
         this.pay(cardNumber, cardExpiry, cardCVC);
       } else {
-        this.booking.status = BookingStatus.PENDING;
+        this.booking.status = BookingStatus.ERROR;
       }
       return this.booking;
     } else {
