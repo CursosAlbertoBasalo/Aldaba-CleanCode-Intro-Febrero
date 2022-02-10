@@ -81,7 +81,7 @@ export class Bookings {
     }
     const maxNonVipPassengersCount = 4;
     // 🧼 conditional validation on functions
-    if (this.hasTooManyPassengersForVip(travelerId, passengersCount, maxNonVipPassengersCount)) {
+    if (this.hasTooManyPassengersForNonVip(travelerId, passengersCount, maxNonVipPassengersCount)) {
       throw new Error(`No VIPs cant't have more than ${maxNonVipPassengersCount} passengers`);
     }
     if (passengersCount <= 0) {
@@ -90,7 +90,7 @@ export class Bookings {
     return passengersCount;
   }
 
-  private hasTooManyPassengersForVip(travelerId: string, passengersCount: number, maxNonVipPassengersCount: number) {
+  private hasTooManyPassengersForNonVip(travelerId: string, passengersCount: number, maxNonVipPassengersCount: number) {
     // 🧼 one operator per statement
     const isTooMuchForNonVip = passengersCount > maxNonVipPassengersCount;
     return this.isNonVip(travelerId) && isTooMuchForNonVip;
