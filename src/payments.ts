@@ -26,37 +26,44 @@ export class Payments {
     payMeCode: string,
     transferAccount: string,
   ): string {
+    // 🧼 complex blocks on functions
     switch (method) {
-      case PaymentMethod.CREDIT_CARD: {
-        const url = `${this.cardWayAPIUrl}payments/card${cardNumber}/${cardExpiry}/${cardCVC}`;
-        const response = HTTP.request(url, { method: "POST", body: { amount: booking.price, concept: booking.id } });
-        if (response.status === 200) {
-          return response.body ? (response.body.transactionID as string) : "";
-        } else {
-          return "";
-        }
-      }
-      case PaymentMethod.PAY_ME: {
-        const url = `${this.payMeAPIUrl}`;
-        const response = HTTP.request(url, {
-          method: "POST",
-          body: { payMeAccount, payMeCode, amount: booking.price, identification: booking.id },
-        });
-        if (response.status === 201) {
-          return response.body ? (response.body.pay_me_code as string) : "";
-        } else {
-          return "";
-        }
-      }
-      case PaymentMethod.TRANSFER: {
-        const smtp = new SMTP();
-        const subject = `Payment request for Booking ${booking.id}`;
-        const body = `Please transfer ${booking.price} to ${transferAccount}`;
-        smtp.sendMail("payments@astrobookings.com", this.bankEmail, subject, body);
-        return "";
-      }
+      case PaymentMethod.CREDIT_CARD:
+        return this.payWithCard(booking, cardNumber, cardExpiry, cardCVC);
+      case PaymentMethod.PAY_ME:
+        return this.payWithPayMe(booking, payMeAccount, payMeCode);
+      case PaymentMethod.TRANSFER:
+        return this.payWithBank(booking, transferAccount);
       default:
         throw new Error(`Unknown payment method: ${method}`);
     }
+  }
+  private payWithCard(booking: Booking, cardNumber: string, cardExpiry: string, cardCVC: string) {
+    const url = `${this.cardWayAPIUrl}payments/card${cardNumber}/${cardExpiry}/${cardCVC}`;
+    const response = HTTP.request(url, { method: "POST", body: { amount: booking.price, concept: booking.id } });
+    if (response.status === 200) {
+      return response.body ? (response.body.transactionID as string) : "";
+    } else {
+      return "";
+    }
+  }
+  private payWithPayMe(booking: Booking, payMeAccount: string, payMeCode: string) {
+    const url = `${this.payMeAPIUrl}`;
+    const response = HTTP.request(url, {
+      method: "POST",
+      body: { payMeAccount, payMeCode, amount: booking.price, identification: booking.id },
+    });
+    if (response.status === 201) {
+      return response.body ? (response.body.pay_me_code as string) : "";
+    } else {
+      return "";
+    }
+  }
+  private payWithBank(booking: Booking, transferAccount: string) {
+    const smtp = new SMTP();
+    const subject = `Payment request for Booking ${booking.id}`;
+    const body = `Please transfer ${booking.price} to ${transferAccount}`;
+    smtp.sendMail("payments@astrobookings.com", this.bankEmail, subject, body);
+    return "";
   }
 }
