@@ -11,6 +11,16 @@ export class Trips {
     this.cancelBookings(tripId, trip);
   }
 
+  public findTrips(destination: string, startDate: string, endDate: string): Trip[] {
+    if (startDate < endDate) {
+      throw new Error("Start date must be before end date");
+    }
+    const trips: Trip[] = DB.select(
+      `SELECT * FROM trips WHERE destination = '${destination}' AND start_date >= '${startDate}' AND end_date <= '${endDate}'`,
+    );
+    return trips;
+  }
+
   private updateTripStatus(tripId: string) {
     const trip: Trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
     trip.status = TripStatus.CANCELLED;
