@@ -33,20 +33,16 @@ export class Bookings {
     hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
-    // 🧼 early return
-    // 🧼 conditional validation on functions
     if (this.hasEntitiesId(travelerId, tripId) === false) {
       throw new Error("Invalid parameters");
     }
     this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
     this.save();
-    // 🧼 one condition per function
     this.pay(cardNumber, cardExpiry, cardCVC);
     return this.booking;
   }
 
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
-    // 🧼 conditional validation on functions
     if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
       this.payWithCreditCard(cardNumber, cardExpiry, cardCVC);
     } else {
@@ -77,13 +73,12 @@ export class Bookings {
   }
 
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
-    // To Do: clean pending...
+    // To Do: 🚧 clean pending...
     const maxPassengersCount = 6;
     if (passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
     const maxNonVipPassengersCount = 4;
-    // 🧼 conditional validation on functions
     if (this.hasTooManyPassengersForNonVip(travelerId, passengersCount, maxNonVipPassengersCount)) {
       throw new Error(`No VIPs cant't have more than ${maxNonVipPassengersCount} passengers`);
     }
@@ -94,7 +89,6 @@ export class Bookings {
   }
 
   private hasTooManyPassengersForNonVip(travelerId: string, passengersCount: number, maxNonVipPassengersCount: number) {
-    // 🧼 one operator per statement
     const isTooMuchForNonVip = passengersCount > maxNonVipPassengersCount;
     return this.isNonVip(travelerId) && isTooMuchForNonVip;
   }
@@ -119,7 +113,6 @@ export class Bookings {
   private payWithCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
     const paymentId = this.payPriceWithCard(cardNumber, cardExpiry, cardCVC);
-    // 🧼 conditional blocks on functions
     if (paymentId != "") {
       this.setPaymentStatus();
     } else {
@@ -160,10 +153,8 @@ export class Bookings {
   }
 
   private calculatePrice(): number {
-    // 🧼 large process divided in small ones
     const millisecondsPerDay = this.calculateMillisecondsPerDay();
     const stayingNights = this.calculateStayingNights(millisecondsPerDay);
-
     const passengerPrice = this.calculatePassengerPrice(stayingNights);
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     const extraTripPrice = this.calculateExtraPricePerTrip();
@@ -194,7 +185,6 @@ export class Bookings {
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
     const hoursPerDay = 24;
-    // 🧼 one operator per statement
     const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
     const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
     const millisecondsPerDay = millisecondsPerHour * hoursPerDay;

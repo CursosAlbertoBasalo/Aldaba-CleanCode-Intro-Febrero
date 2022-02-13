@@ -6,7 +6,6 @@ import { Trip, TripStatus } from "./trip";
 
 export class Trips {
   public cancelTrip(tripId: string) {
-    // 🧼 same level of abstraction
     const trip: Trip = this.updateTripStatus(tripId);
     this.cancelBookings(tripId, trip);
   }
@@ -20,12 +19,10 @@ export class Trips {
 
   private cancelBookings(tripId: string, trip: Trip) {
     const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
-    // 🧼 early return and expressive conditional
     if (this.hasNoBookings(bookings)) {
       return;
     }
     const smtp = new SMTP();
-    // 🧼 no nested structures nor complex blocks
     for (const booking of bookings) {
       this.cancelBooking(booking, smtp, trip);
     }

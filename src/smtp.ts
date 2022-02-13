@@ -15,7 +15,6 @@ export class SMTP {
     this.subject = subject;
     this.body = body;
     const isAFakeCondition = true;
-    // 🧼 no flags as parameters
     if (isAFakeCondition) {
       return this.sendMailWithSMTP();
     } else {
