@@ -1,5 +1,6 @@
 import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
+import { Notifications } from "./notifications";
 import { SMTP } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
@@ -42,12 +43,8 @@ export class Trips {
     if (!traveler) {
       return;
     }
-    smtp.sendMail(
-      "trips@astrobookings.com",
-      traveler.email,
-      "Trip cancelled",
-      `Sorry, your trip ${trip.destination} has been cancelled.`,
-    );
+    const notifications = new Notifications();
+    notifications.notifyTripCancellation(traveler.email, trip.destination);
   }
 
   private updateBookingStatus(booking: Booking) {
