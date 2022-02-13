@@ -4,6 +4,7 @@ export enum BookingStatus {
   RESERVED,
   NOTIFIED_RESERVATION,
   ERROR,
+  CANCELLED,
 }
 export class Booking {
   public id: string | undefined;
