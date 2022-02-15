@@ -1,5 +1,8 @@
 import { Booking, BookingStatus } from "./booking";
+import { DateRange } from "./dateRange";
 import { DB } from "./db";
+import { FindTripsDTO } from "./findTripsDTO";
+import { Notifications } from "./notifications";
 import { SMTP } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
@@ -8,6 +11,15 @@ export class Trips {
   public cancelTrip(tripId: string) {
     const trip: Trip = this.updateTripStatus(tripId);
     this.cancelBookings(tripId, trip);
+  }
+
+  public findTrips(findTripsDTO: FindTripsDTO): Trip[] {
+    // 🧼 date range ensures the range is valid
+    const dates = new DateRange(findTripsDTO.startDate, findTripsDTO.endDate);
+    const trips: Trip[] = DB.select(
+      `SELECT * FROM trips WHERE destination = '${findTripsDTO.destination}' AND start_date >= '${dates.start}' AND end_date <= '${dates.end}'`,
+    );
+    return trips;
   }
 
   private updateTripStatus(tripId: string) {
@@ -42,12 +54,8 @@ export class Trips {
     if (!traveler) {
       return;
     }
-    smtp.sendMail(
-      "trips@astrobookings.com",
-      traveler.email,
-      "Trip cancelled",
-      `Sorry, your trip ${trip.destination} has been cancelled.`,
-    );
+    const notifications = new Notifications();
+    notifications.notifyTripCancellation({ recipient: traveler.email, tripDestination: trip.destination });
   }
 
   private updateBookingStatus(booking: Booking) {
