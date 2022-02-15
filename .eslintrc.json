@@ -14,7 +14,7 @@
   },
   "globals": {},
   "rules": {
-    "arrow-parens": ["warn", "as-needed"],
+    "arrow-parens": ["warn", "always"],
     "block-spacing": ["warn", "always"],
     "curly": ["warn", "all"],
     "max-depth": ["warn", 1],
