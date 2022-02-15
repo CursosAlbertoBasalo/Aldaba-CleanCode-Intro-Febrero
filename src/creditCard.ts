@@ -1,10 +1,10 @@
 export class CreditCard {
-  constructor(public readonly number: string, public readonly expiration: string, public readonly cvv: string) {
-    this.assertValidCard();
+  public get toHumanReadable(): string {
+    return `${this.number} expires on ${this.expiration}`;
   }
 
-  public toHumanReadable(): string {
-    return `${this.number} expires on ${this.expiration}`;
+  constructor(public readonly number: string, public readonly expiration: string, public readonly cvv: string) {
+    this.assertValidCard();
   }
 
   private assertValidCard() {

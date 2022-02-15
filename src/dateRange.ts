@@ -1,4 +1,12 @@
 export class DateRange {
+  public get toWholeDays() {
+    const millisecondsTripDuration = this.end.getTime() - this.start.getTime();
+    const millisecondsPerDay = this.calculateMillisecondsPerDay();
+    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
+    const stayingNights = Math.round(rawStayingNights);
+    return stayingNights;
+  }
+
   constructor(public readonly start: Date, public readonly end: Date) {
     // 🧼 date range ensures the range is valid
     // readonly means that the property cannot be changed
@@ -12,13 +20,6 @@ export class DateRange {
   }
   private areInValidDates(): boolean {
     return this.start > this.end;
-  }
-  public toWholeDays() {
-    const millisecondsTripDuration = this.end.getTime() - this.start.getTime();
-    const millisecondsPerDay = this.calculateMillisecondsPerDay();
-    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
-    const stayingNights = Math.round(rawStayingNights);
-    return stayingNights;
   }
 
   private calculateMillisecondsPerDay() {

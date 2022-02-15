@@ -6,7 +6,11 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": ["prettier", "@typescript-eslint"],
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+    "max-params-no-constructor"
+  ],
   "env": {
     "browser": true,
     "es6": true,
@@ -14,27 +18,77 @@
   },
   "globals": {},
   "rules": {
-    "arrow-parens": ["warn", "always"],
-    "block-spacing": ["warn", "always"],
-    "curly": ["warn", "all"],
-    "max-depth": ["warn", 1],
-    "max-nested-callbacks": ["warn", 1],
-    "max-statements": ["warn", 9],
-    "max-statements-per-line": ["warn", { "max": 1 }],
-    "max-lines-per-function": ["warn", { "max": 19 , "skipBlankLines": true, "skipComments": true }],
-    "one-var-declaration-per-line": ["warn", "always"],
-    "operator-linebreak": ["warn", "none"],
-    "operator-assignment": ["warn", "always"],
+    "arrow-parens": [
+      "warn",
+      "always"
+    ],
+    "block-spacing": [
+      "warn",
+      "always"
+    ],
+    "curly": [
+      "warn",
+      "all"
+    ],
+    "max-depth": [
+      "warn",
+      1
+    ],
+    "max-nested-callbacks": [
+      "warn",
+      1
+    ],
+    "max-params-no-constructor/max-params-no-constructor": [
+      "warn",
+      1
+    ],
+    "max-statements": [
+      "warn",
+      9
+    ],
+    "max-statements-per-line": [
+      "warn",
+      {
+        "max": 1
+      }
+    ],
+    "max-lines-per-function": [
+      "warn",
+      {
+        "max": 19,
+        "skipBlankLines": true,
+        "skipComments": true
+      }
+    ],
+    "one-var-declaration-per-line": [
+      "warn",
+      "always"
+    ],
+    "operator-linebreak": [
+      "warn",
+      "none"
+    ],
+    "operator-assignment": [
+      "warn",
+      "always"
+    ],
     "no-magic-numbers": [
       "warn",
       {
         "detectObjects": false,
-        "enforceConst": true,
-        "ignore": [-1, 0, 1, 2],
-        "ignoreArrayIndexes": true
+        "ignore": [
+          -1,
+          0,
+          1,
+          2
+        ],
+        "ignoreArrayIndexes": true,
+        "ignoreReadonlyClassProperties": true
       }
     ],
-    "no-mixed-operators": ["warn"],
+    "no-mixed-operators": [
+      "warn"
+    ],
     "no-multiple-empty-lines": [
       "warn",
       {
@@ -50,35 +104,69 @@
       "warn",
       {
         "selector": "default",
-        "format": ["camelCase"],
+        "format": [
+          "camelCase"
+        ],
         "leadingUnderscore": "forbid"
       },
       {
         "selector": "typeLike",
-        "format": ["PascalCase"]
+        "format": [
+          "PascalCase"
+        ]
       },
       {
         "selector": "enumMember",
-        "format": ["UPPER_CASE"]
+        "format": [
+          "UPPER_CASE"
+        ]
       },
       {
-        "selector": ["memberLike","variableLike"],
-        "types": ["boolean"],
-        "format": ["PascalCase"],
-        "prefix": ["can", "did", "has", "is", "must", "needs", "should", "will"]
+        "selector": [
+          "memberLike",
+          "variableLike"
+        ],
+        "types": [
+          "boolean"
+        ],
+        "format": [
+          "PascalCase"
+        ],
+        "prefix": [
+          "can",
+          "did",
+          "has",
+          "is",
+          "must",
+          "needs",
+          "should",
+          "will"
+        ]
       },
       {
-        "selector": ["memberLike","variableLike"],
-        "types": ["array"],
-        "format": ["camelCase"],
+        "selector": [
+          "memberLike",
+          "variableLike"
+        ],
+        "types": [
+          "array"
+        ],
+        "format": [
+          "camelCase"
+        ],
         "custom": {
           "match": true,
           "regex": "[s|List]$"
         }
       },
       {
-        "selector": ["function", "method"],
-        "format": ["PascalCase"],
+        "selector": [
+          "function",
+          "method"
+        ],
+        "format": [
+          "PascalCase"
+        ],
         "prefix": [
           "add",
           "are",
@@ -148,7 +236,6 @@
           "sum",
           "take",
           "test",
-          "to",
           "throw",
           "transform",
           "update",

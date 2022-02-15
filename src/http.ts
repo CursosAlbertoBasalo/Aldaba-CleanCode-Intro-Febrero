@@ -1,11 +1,16 @@
-export class Response {
-  public url: string | undefined;
-  public status: number | undefined;
-  public body: Record<string, unknown> | undefined;
-}
+export type HttpResponse = {
+  url: string | undefined;
+  status: number | undefined;
+  body: Record<string, unknown> | undefined;
+};
+type HttpRequest = {
+  url: string;
+  options: unknown;
+};
+
 export class HTTP {
-  static request(url: string, options: unknown): Response {
-    console.log(url, options);
-    return { url, status: 200, body: { data: {} } };
+  static request(httpRequest: HttpRequest): HttpResponse {
+    console.log(httpRequest);
+    return { url: httpRequest.url, status: 200, body: { data: {} } };
   }
 }
