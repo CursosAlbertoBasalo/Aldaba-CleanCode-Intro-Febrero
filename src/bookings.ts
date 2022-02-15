@@ -137,7 +137,7 @@ export class Bookings {
 
   private payPriceWithCard(creditCard: CreditCard) {
     const payments = new Payments();
-    const paymentId = payments.payBooking(this.booking, PaymentMethod.CREDIT_CARD, creditCard, "", "", "");
+    const paymentId = payments.payBooking(this.booking, PaymentMethod.CREDIT_CARD, creditCard, undefined, "");
     return paymentId;
   }
 
