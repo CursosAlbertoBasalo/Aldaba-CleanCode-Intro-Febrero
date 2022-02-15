@@ -28,9 +28,9 @@
 
 -[x] **3.1.- Use maps to avoid switch statements**
 
--[ ] **3.2.- Use structures to group primitives**
+-[x] **3.2.- Use structures to group primitives**
 
--[ ] **3.3.- Use value objects to validate data**
+-[x] **3.3.- Use value objects to validate data**
 
 ## 4.- SOLID Principles
 
