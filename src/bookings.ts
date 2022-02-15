@@ -1,4 +1,5 @@
 import { Booking, BookingStatus } from "./booking";
+import { CreditCard } from "./creditCard";
 import { DB } from "./db";
 import { Notifications } from "./notifications";
 import { PaymentMethod, Payments } from "./payments";
@@ -52,10 +53,13 @@ export class Bookings {
   }
 
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
-    if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
-      this.payWithCreditCard(cardNumber, cardExpiry, cardCVC);
-    } else {
+    try {
+      const creditCard = new CreditCard(cardNumber, cardExpiry, cardCVC);
+      this.payWithCreditCard(creditCard);
+    } catch (error) {
       this.booking.status = BookingStatus.ERROR;
+      DB.update(this.booking);
+      throw error;
     }
   }
 
@@ -119,29 +123,20 @@ export class Bookings {
     this.booking.id = DB.insert<Booking>(this.booking);
   }
 
-  private payWithCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
+  private payWithCreditCard(creditCard: CreditCard) {
     this.booking.price = this.calculatePrice();
-    const paymentId = this.payPriceWithCard(cardNumber, cardExpiry, cardCVC);
+    const paymentId = this.payPriceWithCard(creditCard);
     if (paymentId != "") {
       this.setPaymentStatus();
     } else {
-      this.processNonPayedBooking(cardNumber);
+      this.processNonPayedBooking(creditCard.number);
     }
     DB.update(this.booking);
   }
 
-  private payPriceWithCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
+  private payPriceWithCard(creditCard: CreditCard) {
     const payments = new Payments();
-    const paymentId = payments.payBooking(
-      this.booking,
-      PaymentMethod.CREDIT_CARD,
-      cardNumber,
-      cardExpiry,
-      cardCVC,
-      "",
-      "",
-      "",
-    );
+    const paymentId = payments.payBooking(this.booking, PaymentMethod.CREDIT_CARD, creditCard, "", "", "");
     return paymentId;
   }
 

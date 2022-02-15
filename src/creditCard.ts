@@ -1,10 +1,10 @@
 export class CreditCard {
-  constructor(public readonly number: string, public readonly expiration: Date, public readonly cvv: number) {
+  constructor(public readonly number: string, public readonly expiration: string, public readonly cvv: string) {
     this.assertValidCard();
   }
 
   public toHumanReadable(): string {
-    return `${this.number} expires on ${this.expiration.toDateString()}`;
+    return `${this.number} expires on ${this.expiration}`;
   }
 
   private assertValidCard() {
@@ -13,6 +13,6 @@ export class CreditCard {
     }
   }
   private isInValidCard(): boolean {
-    return this.number === "" || this.expiration === null || this.cvv === 0;
+    return this.number === "" || this.expiration === "" || this.cvv === "";
   }
 }
