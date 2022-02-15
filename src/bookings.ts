@@ -1,5 +1,6 @@
 import { Booking, BookingStatus } from "./booking";
 import { CreditCard } from "./creditCard";
+import { DateRange } from "./dateRange";
 import { DB } from "./db";
 import { Notifications } from "./notifications";
 import { PaymentMethod, Payments } from "./payments";
@@ -157,8 +158,7 @@ export class Bookings {
   }
 
   private calculatePrice(): number {
-    const millisecondsPerDay = this.calculateMillisecondsPerDay();
-    const stayingNights = this.calculateStayingNights(millisecondsPerDay);
+    const stayingNights = new DateRange(this.trip.startDate, this.trip.endDate).toWholeDays();
     const passengerPrice = this.calculatePassengerPrice(stayingNights);
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     const extraTripPrice = this.calculateExtraPricePerTrip();
@@ -175,23 +175,5 @@ export class Bookings {
     const flightPrice = this.trip.flightPrice + premiumFoodsPrice;
     const passengerPrice = flightPrice + stayingPrice;
     return passengerPrice;
-  }
-
-  private calculateStayingNights(millisecondsPerDay: number) {
-    const millisecondsTripDuration = this.trip.endDate.getTime() - this.trip.startDate.getTime();
-    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
-    const stayingNights = Math.round(rawStayingNights);
-    return stayingNights;
-  }
-
-  private calculateMillisecondsPerDay() {
-    const millisecondsPerSecond = 1000;
-    const secondsPerMinute = 60;
-    const minutesPerHour = 60;
-    const hoursPerDay = 24;
-    const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
-    const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
-    const millisecondsPerDay = millisecondsPerHour * hoursPerDay;
-    return millisecondsPerDay;
   }
 }

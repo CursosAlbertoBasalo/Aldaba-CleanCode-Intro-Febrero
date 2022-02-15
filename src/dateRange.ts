@@ -13,4 +13,22 @@ export class DateRange {
   private areInValidDates(): boolean {
     return this.start > this.end;
   }
+  public toWholeDays() {
+    const millisecondsTripDuration = this.end.getTime() - this.start.getTime();
+    const millisecondsPerDay = this.calculateMillisecondsPerDay();
+    const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
+    const stayingNights = Math.round(rawStayingNights);
+    return stayingNights;
+  }
+
+  private calculateMillisecondsPerDay() {
+    const millisecondsPerSecond = 1000;
+    const secondsPerMinute = 60;
+    const minutesPerHour = 60;
+    const hoursPerDay = 24;
+    const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
+    const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
+    const millisecondsPerDay = millisecondsPerHour * hoursPerDay;
+    return millisecondsPerDay;
+  }
 }
