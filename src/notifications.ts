@@ -10,8 +10,16 @@ const notificationsConfigurations = [
     sender: "payments@astrobookings.com",
     subject: "Payment request for Booking",
   },
-  { kind: NotificationKinds.BOOKING_CONFIRMED, sender: "bookings@astrobookings.com", subject: "Booking confirmation" },
-  { kind: NotificationKinds.TRIP_CANCELLED, sender: "trips@astrobookings.com", subject: "Trip cancelled" },
+  {
+    kind: NotificationKinds.BOOKING_CONFIRMED,
+    sender: "bookings@astrobookings.com",
+    subject: "Booking confirmation",
+  },
+  {
+    kind: NotificationKinds.TRIP_CANCELLED,
+    sender: "trips@astrobookings.com",
+    subject: "Trip cancelled",
+  },
 ];
 export class Notifications {
   private smtp = new SMTP();
