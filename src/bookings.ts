@@ -31,7 +31,8 @@ export class Bookings {
     this.notify();
     return this.booking;
   }
-  notify() {
+
+  private notify() {
     if (this.booking.id === undefined) {
       return;
     }
