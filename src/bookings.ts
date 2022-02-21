@@ -14,6 +14,7 @@ export class Bookings {
   private booking!: Booking;
   private trip!: Trip;
   private traveler!: Traveler;
+  private bookingsRequest!: BookingsRequest;
 
   /**
    * Requests a new booking
@@ -24,10 +25,10 @@ export class Bookings {
   public request(bookingsRequestDTO: BookingsRequestDTO): Booking {
     // 🧼 Data transfer object to avoid multiple parameters on methods signatures
     // TO Do: booking request object value validation
-    const bookingsRequest = new BookingsRequest(bookingsRequestDTO);
-    this.create(bookingsRequest);
+    this.bookingsRequest = new BookingsRequest(bookingsRequestDTO);
+    this.create();
     this.save();
-    this.pay(bookingsRequest);
+    this.pay();
     this.notify();
     return this.booking;
   }
@@ -44,9 +45,9 @@ export class Bookings {
     });
   }
 
-  private pay(bookingsRequest: BookingsRequest) {
+  private pay() {
     try {
-      this.payWithCreditCard(bookingsRequest.card);
+      this.payWithCreditCard(this.bookingsRequest.card);
     } catch (error) {
       this.booking.status = BookingStatus.ERROR;
       DB.update(this.booking);
@@ -54,12 +55,16 @@ export class Bookings {
     }
   }
 
-  private create(bookingsRequest: BookingsRequest): void {
-    bookingsRequest.passengersCount = this.getValidatedPassengersCount(bookingsRequest);
-    this.checkAvailability(bookingsRequest);
-    this.booking = new Booking(bookingsRequest.tripId, bookingsRequest.travelerId, bookingsRequest.passengersCount);
-    this.booking.hasPremiumFoods = bookingsRequest.hasPremiumFoods;
-    this.booking.extraLuggageKilos = bookingsRequest.extraLuggageKilos;
+  private create(): void {
+    this.bookingsRequest.passengersCount = this.getValidatedPassengersCount(this.bookingsRequest);
+    this.checkAvailability(this.bookingsRequest);
+    this.booking = new Booking(
+      this.bookingsRequest.tripId,
+      this.bookingsRequest.travelerId,
+      this.bookingsRequest.passengersCount,
+    );
+    this.booking.hasPremiumFoods = this.bookingsRequest.hasPremiumFoods;
+    this.booking.extraLuggageKilos = this.bookingsRequest.extraLuggageKilos;
   }
 
   private getValidatedPassengersCount(bookingsRequest: BookingsRequest) {
