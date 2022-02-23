@@ -1,8 +1,8 @@
 import { Booking, BookingStatus } from "./booking";
-import { BookingsRequest } from "./bookingsRequest";
 import { BookingsRequestDTO } from "./bookingsRequestDTO";
-import { CreditCard } from "./creditCard";
-import { DateRange } from "./dateRange";
+import { BookingsRequestVO } from "./bookingsRequestVO";
+import { CreditCardVO } from "./creditCardVO";
+import { DateRangeVO } from "./dateRangeVO";
 import { DB } from "./db";
 import { Notifications } from "./notifications";
 import { PaymentMethod, Payments } from "./payments";
@@ -14,7 +14,7 @@ export class Bookings {
   private booking!: Booking;
   private trip!: Trip;
   private traveler!: Traveler;
-  private bookingsRequest!: BookingsRequest;
+  private bookingsRequest!: BookingsRequestVO;
 
   /**
    * Requests a new booking
@@ -25,7 +25,7 @@ export class Bookings {
   public request(bookingsRequestDTO: BookingsRequestDTO): Booking {
     // 🧼 Data transfer object to avoid multiple parameters on methods signatures
     // TO Do: booking request object value validation
-    this.bookingsRequest = new BookingsRequest(bookingsRequestDTO);
+    this.bookingsRequest = new BookingsRequestVO(bookingsRequestDTO);
     this.create();
     this.save();
     this.pay();
@@ -67,24 +67,24 @@ export class Bookings {
     this.booking.extraLuggageKilos = this.bookingsRequest.extraLuggageKilos;
   }
 
-  private getValidatedPassengersCount(bookingsRequest: BookingsRequest) {
+  private getValidatedPassengersCount(bookingsRequest: BookingsRequestVO) {
     this.assertPassengers(bookingsRequest);
 
     return bookingsRequest.passengersCount;
   }
 
-  private assertPassengers(bookingsRequest: BookingsRequest) {
+  private assertPassengers(bookingsRequest: BookingsRequestVO) {
     this.assertPassengersForVip(bookingsRequest);
     this.assertPassengersForNonVip(bookingsRequest);
   }
 
-  private assertPassengersForVip(bookingsRequest: BookingsRequest) {
+  private assertPassengersForVip(bookingsRequest: BookingsRequestVO) {
     const maxPassengersCount = 6;
     if (bookingsRequest.passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
   }
-  private assertPassengersForNonVip(bookingsRequest: BookingsRequest) {
+  private assertPassengersForNonVip(bookingsRequest: BookingsRequestVO) {
     const maxNonVipPassengersCount = 4;
     const isTooMuchForNonVip = bookingsRequest.passengersCount > maxNonVipPassengersCount;
     if (this.isNonVip(bookingsRequest.travelerId) && isTooMuchForNonVip) {
@@ -97,7 +97,7 @@ export class Bookings {
     return this.traveler.isVip;
   }
 
-  private checkAvailability(bookingsRequest: BookingsRequest) {
+  private checkAvailability(bookingsRequest: BookingsRequestVO) {
     this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${bookingsRequest.tripId}'`);
     const hasAvailableSeats = this.trip.availablePlaces >= bookingsRequest.passengersCount;
     if (!hasAvailableSeats) {
@@ -109,7 +109,7 @@ export class Bookings {
     this.booking.id = DB.insert<Booking>(this.booking);
   }
 
-  private payWithCreditCard(creditCard: CreditCard) {
+  private payWithCreditCard(creditCard: CreditCardVO) {
     this.booking.price = this.calculatePrice();
     const paymentId = this.payPriceWithCard(creditCard);
     if (paymentId != "") {
@@ -120,7 +120,7 @@ export class Bookings {
     DB.update(this.booking);
   }
 
-  private payPriceWithCard(creditCard: CreditCard) {
+  private payPriceWithCard(creditCard: CreditCardVO) {
     const payments = new Payments(this.booking);
     const paymentId = payments.payBooking({
       method: PaymentMethod.CREDIT_CARD,
@@ -148,7 +148,7 @@ export class Bookings {
   }
 
   private calculatePrice(): number {
-    const stayingNights = new DateRange(this.trip.startDate, this.trip.endDate).toWholeDays;
+    const stayingNights = new DateRangeVO(this.trip.startDate, this.trip.endDate).toWholeDays;
     const passengerPrice = this.calculatePassengerPrice(stayingNights);
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     const extraTripPrice = this.calculateExtraPricePerTrip();

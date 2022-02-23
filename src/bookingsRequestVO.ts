@@ -1,11 +1,11 @@
 import { BookingsRequestDTO } from "./bookingsRequestDTO";
-import { CreditCard } from "./creditCard";
+import { CreditCardVO } from "./creditCardVO";
 
-export class BookingsRequest {
+export class BookingsRequestVO {
   travelerId: string;
   tripId: string;
   passengersCount: number;
-  card: CreditCard;
+  card: CreditCardVO;
   hasPremiumFoods: boolean;
   extraLuggageKilos: number;
 
@@ -19,7 +19,7 @@ export class BookingsRequest {
     this.travelerId = bookingsRequestDTO.travelerId;
     this.tripId = bookingsRequestDTO.tripId;
     this.passengersCount = bookingsRequestDTO.passengersCount;
-    this.card = new CreditCard(
+    this.card = new CreditCardVO(
       bookingsRequestDTO.cardNumber,
       bookingsRequestDTO.cardExpiry,
       bookingsRequestDTO.cardCVC,

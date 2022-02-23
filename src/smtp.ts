@@ -1,7 +1,7 @@
-import { Email } from "./email";
+import { EmailDTO } from "./emailDTO";
 
 export interface ISendMail {
-  sendMail(email: Email): string;
+  sendMail(email: EmailDTO): string;
 }
 
 export class SMTP implements ISendMail {
@@ -10,9 +10,9 @@ export class SMTP implements ISendMail {
   private smtpSecurePort = 587;
   private smtpUser = "Traveler assistant";
   private smtpPassword = "astrobookings";
-  private email!: Email;
+  private email!: EmailDTO;
 
-  public sendMail(email: Email): string {
+  public sendMail(email: EmailDTO): string {
     this.email = email;
     const isAFakeCondition = true;
     if (isAFakeCondition) {

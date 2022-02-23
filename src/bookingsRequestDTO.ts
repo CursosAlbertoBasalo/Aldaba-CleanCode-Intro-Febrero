@@ -1,5 +1,3 @@
-// 🧼 Data transfer object to avoid primitive types in the code
-
 export type BookingsRequestDTO = {
   travelerId: string; // - the id of the traveler soliciting the booking
   tripId: string; // - the id of the trip to book
