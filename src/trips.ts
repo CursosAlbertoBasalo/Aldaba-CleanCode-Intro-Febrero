@@ -1,5 +1,5 @@
 import { Booking, BookingStatus } from "./booking";
-import { DateRange } from "./dateRange";
+import { DateRangeVO } from "./dateRangeVO";
 import { DB } from "./db";
 import { FindTripsDTO } from "./findTripsDTO";
 import { Notifications } from "./notifications";
@@ -15,7 +15,7 @@ export class Trips {
 
   public findTrips(findTripsDTO: FindTripsDTO): Trip[] {
     // 🧼 date range ensures the range is valid
-    const dates = new DateRange(findTripsDTO.startDate, findTripsDTO.endDate);
+    const dates = new DateRangeVO(findTripsDTO.startDate, findTripsDTO.endDate);
     const trips: Trip[] = DB.select(
       `SELECT * FROM trips WHERE destination = '${findTripsDTO.destination}' AND start_date >= '${dates.start}' AND end_date <= '${dates.end}'`,
     );

@@ -1,4 +1,4 @@
-export class CreditCard {
+export class CreditCardVO {
   public get toHumanReadable(): string {
     return `${this.number} expires on ${this.expiration}`;
   }

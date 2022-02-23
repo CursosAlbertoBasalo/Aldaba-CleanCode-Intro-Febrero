@@ -1,9 +1,9 @@
 import { Booking } from "./booking";
-import { BookingPayment } from "./bookingPayment";
-import { CreditCard } from "./creditCard";
+import { BookingPaymentDTO } from "./bookingPaymentDTO";
+import { CreditCardVO } from "./creditCardVO";
 import { HTTP } from "./http";
 import { Notifications } from "./notifications";
-import { PayMe } from "./payMe";
+import { PayMeDTO } from "./payMeDTO";
 export enum PaymentMethod {
   CREDIT_CARD,
   PAY_ME,
@@ -20,7 +20,7 @@ export class Payments {
 
   constructor(private booking: Booking) {}
 
-  public payBooking(bookingPayment: BookingPayment): string {
+  public payBooking(bookingPayment: BookingPaymentDTO): string {
     switch (bookingPayment.method) {
       case PaymentMethod.CREDIT_CARD:
         return this.payWithCard(bookingPayment.creditCard);
@@ -32,7 +32,7 @@ export class Payments {
         throw new Error(`Unknown payment method: ${bookingPayment.method}`);
     }
   }
-  private payWithCard(creditCard?: CreditCard) {
+  private payWithCard(creditCard?: CreditCardVO) {
     if (creditCard === undefined) {
       throw new Error("Missing credit card");
     }
@@ -47,7 +47,7 @@ export class Payments {
       return "";
     }
   }
-  private payWithPayMe(payMe?: PayMe) {
+  private payWithPayMe(payMe?: PayMeDTO) {
     if (payMe === undefined) {
       throw new Error("PayMe is undefined");
     }
@@ -62,7 +62,7 @@ export class Payments {
       return "";
     }
   }
-  private buildOptions(payMe: PayMe): unknown {
+  private buildOptions(payMe: PayMeDTO): unknown {
     return {
       method: "POST",
       body: {

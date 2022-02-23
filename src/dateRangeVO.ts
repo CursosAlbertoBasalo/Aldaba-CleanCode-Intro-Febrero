@@ -1,4 +1,4 @@
-export class DateRange {
+export class DateRangeVO {
   public get toWholeDays() {
     const millisecondsTripDuration = this.end.getTime() - this.start.getTime();
     const millisecondsPerDay = this.calculateMillisecondsPerDay();
