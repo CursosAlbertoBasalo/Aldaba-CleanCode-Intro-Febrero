@@ -8,9 +8,13 @@ import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
 export class Trips {
+  private tripId = "";
+  private trip!: Trip;
   public cancelTrip(tripId: string) {
-    const trip: Trip = this.updateTripStatus(tripId);
-    this.cancelBookings(tripId, trip);
+    // 🧼 Saved as a properties on the class to reduce method parameters
+    this.tripId = tripId;
+    this.trip = this.updateTripStatus();
+    this.cancelBookings();
   }
 
   public findTrips(findTripsDTO: FindTripsDTO): Trip[] {
@@ -22,21 +26,21 @@ export class Trips {
     return trips;
   }
 
-  private updateTripStatus(tripId: string) {
-    const trip: Trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+  private updateTripStatus() {
+    const trip: Trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.tripId}'`);
     trip.status = TripStatus.CANCELLED;
     DB.update(trip);
     return trip;
   }
 
-  private cancelBookings(tripId: string, trip: Trip) {
-    const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
+  private cancelBookings() {
+    const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + this.tripId);
     if (this.hasNoBookings(bookings)) {
       return;
     }
     const smtp = new SMTP();
     for (const booking of bookings) {
-      this.cancelBooking(booking, smtp, trip);
+      this.cancelBooking(booking, smtp, this.trip);
     }
   }
 
@@ -55,7 +59,11 @@ export class Trips {
       return;
     }
     const notifications = new Notifications();
-    notifications.notifyTripCancellation({ recipient: traveler.email, tripDestination: trip.destination });
+    notifications.notifyTripCancellation({
+      recipient: traveler.email,
+      tripDestination: trip.destination,
+      bookingId: booking.id,
+    });
   }
 
   private updateBookingStatus(booking: Booking) {

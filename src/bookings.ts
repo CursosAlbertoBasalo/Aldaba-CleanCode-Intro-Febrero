@@ -14,6 +14,7 @@ export class Bookings {
   private booking!: Booking;
   private trip!: Trip;
   private traveler!: Traveler;
+  private bookingsRequest!: BookingsRequestVO;
 
   /**
    * Requests a new booking
@@ -23,11 +24,11 @@ export class Bookings {
    */
   public request(bookingsRequestDTO: BookingsRequestDTO): Booking {
     // 🧼 Data transfer object to avoid multiple parameters on methods signatures
-    // TO Do: booking request object value validation
-    const bookingsRequest = new BookingsRequestVO(bookingsRequestDTO);
-    this.create(bookingsRequest);
+    // 🧼 Saved as a property on the class to reduce method parameters
+    this.bookingsRequest = new BookingsRequestVO(bookingsRequestDTO);
+    this.create();
     this.save();
-    this.pay(bookingsRequest);
+    this.pay();
     this.notify();
     return this.booking;
   }
@@ -43,9 +44,9 @@ export class Bookings {
     });
   }
 
-  private pay(bookingsRequest: BookingsRequestVO) {
+  private pay() {
     try {
-      this.payWithCreditCard(bookingsRequest.card);
+      this.payWithCreditCard(this.bookingsRequest.card);
     } catch (error) {
       this.booking.status = BookingStatus.ERROR;
       DB.update(this.booking);
@@ -53,35 +54,39 @@ export class Bookings {
     }
   }
 
-  private create(bookingsRequest: BookingsRequestVO): void {
-    bookingsRequest.passengersCount = this.getValidatedPassengersCount(bookingsRequest);
-    this.checkAvailability(bookingsRequest);
-    this.booking = new Booking(bookingsRequest.tripId, bookingsRequest.travelerId, bookingsRequest.passengersCount);
-    this.booking.hasPremiumFoods = bookingsRequest.hasPremiumFoods;
-    this.booking.extraLuggageKilos = bookingsRequest.extraLuggageKilos;
+  private create(): void {
+    this.bookingsRequest.passengersCount = this.getValidatedPassengersCount();
+    this.checkAvailability();
+    this.booking = new Booking(
+      this.bookingsRequest.tripId,
+      this.bookingsRequest.travelerId,
+      this.bookingsRequest.passengersCount,
+    );
+    this.booking.hasPremiumFoods = this.bookingsRequest.hasPremiumFoods;
+    this.booking.extraLuggageKilos = this.bookingsRequest.extraLuggageKilos;
   }
 
-  private getValidatedPassengersCount(bookingsRequest: BookingsRequestVO) {
-    this.assertPassengers(bookingsRequest);
+  private getValidatedPassengersCount() {
+    this.assertPassengers();
 
-    return bookingsRequest.passengersCount;
+    return this.bookingsRequest.passengersCount;
   }
 
-  private assertPassengers(bookingsRequest: BookingsRequestVO) {
-    this.assertPassengersForVip(bookingsRequest);
-    this.assertPassengersForNonVip(bookingsRequest);
+  private assertPassengers() {
+    this.assertPassengersForVip();
+    this.assertPassengersForNonVip();
   }
 
-  private assertPassengersForVip(bookingsRequest: BookingsRequestVO) {
+  private assertPassengersForVip() {
     const maxPassengersCount = 6;
-    if (bookingsRequest.passengersCount > maxPassengersCount) {
+    if (this.bookingsRequest.passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
   }
-  private assertPassengersForNonVip(bookingsRequest: BookingsRequestVO) {
+  private assertPassengersForNonVip() {
     const maxNonVipPassengersCount = 4;
-    const isTooMuchForNonVip = bookingsRequest.passengersCount > maxNonVipPassengersCount;
-    if (this.isNonVip(bookingsRequest.travelerId) && isTooMuchForNonVip) {
+    const isTooMuchForNonVip = this.bookingsRequest.passengersCount > maxNonVipPassengersCount;
+    if (this.isNonVip(this.bookingsRequest.travelerId) && isTooMuchForNonVip) {
       throw new Error(`Nobody can't have more than ${maxNonVipPassengersCount} passengers`);
     }
   }
@@ -91,9 +96,9 @@ export class Bookings {
     return this.traveler.isVip;
   }
 
-  private checkAvailability(bookingsRequest: BookingsRequestVO) {
-    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${bookingsRequest.tripId}'`);
-    const hasAvailableSeats = this.trip.availablePlaces >= bookingsRequest.passengersCount;
+  private checkAvailability() {
+    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.bookingsRequest.tripId}'`);
+    const hasAvailableSeats = this.trip.availablePlaces >= this.bookingsRequest.passengersCount;
     if (!hasAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
