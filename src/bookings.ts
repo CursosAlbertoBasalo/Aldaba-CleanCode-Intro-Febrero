@@ -1,5 +1,5 @@
 import { Booking, BookingStatus } from "./booking";
-import { DB } from "./db";
+import { DataBase } from "./database";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 // 🧼 PascalCase
@@ -68,12 +68,12 @@ export class Bookings {
   }
   // 🧼 boolean verbs should start with flags
   private isNonVip(travelerId: string): boolean {
-    const theTraveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
+    const theTraveler = DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
     return theTraveler.isVip;
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
-    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    this.trip = DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
     // 🧼 flags should start with flag verbs
     const hasAvailableSeats = this.trip.availablePlaces >= passengersCount;
     if (!hasAvailableSeats) {
@@ -82,7 +82,7 @@ export class Bookings {
   }
   // 🧼 remove redundant comments and words
   private save() {
-    this.booking.id = DB.insert<Booking>(this.booking);
+    this.booking.id = DataBase.insert<Booking>(this.booking);
   }
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
@@ -90,7 +90,7 @@ export class Bookings {
     console.log(`Paying ${this.booking.price} with ${cardNumber} and ${cardExpiry} and ${cardCVC}`);
     this.booking.paymentId = "payment fake identification";
     this.booking.status = BookingStatus.PAID;
-    DB.update(this.booking);
+    DataBase.update(this.booking);
   }
   // 🧼 use verbs to clarify intention
   private calculatePrice(): number {
