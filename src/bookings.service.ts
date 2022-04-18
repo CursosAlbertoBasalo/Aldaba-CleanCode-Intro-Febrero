@@ -1,9 +1,9 @@
 import { Booking, BookingStatus } from "./booking";
-import { DataBase } from "./database";
+import { DataBase } from "./data_base";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 // 🧼 PascalCase
-export class Bookings {
+export class BookingsService {
   private booking!: Booking;
   private trip!: Trip; // 🧼 consistent naming
 
