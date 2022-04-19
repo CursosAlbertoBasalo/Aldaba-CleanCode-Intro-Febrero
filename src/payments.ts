@@ -2,8 +2,8 @@
 /* eslint-disable max-depth */
 /* eslint-disable max-lines-per-function */
 import { Booking } from "./booking";
-import { HTTP } from "./http";
-import { SMTP } from "./smtp";
+import { Http } from "./http";
+import { Smtp } from "./smtp";
 
 export enum PaymentMethod {
   CREDIT_CARD,
@@ -26,7 +26,7 @@ export class Payments {
     payMeCode: string,
     transferAccount: string,
   ): string {
-    // 🧼 complex blocks on functions
+    // 🧼 🚿 complex blocks on functions
     switch (method) {
       case PaymentMethod.CREDIT_CARD:
         return this.payWithCard(booking, cardNumber, cardExpiry, cardCVC);
@@ -40,7 +40,7 @@ export class Payments {
   }
   private payWithCard(booking: Booking, cardNumber: string, cardExpiry: string, cardCVC: string) {
     const url = `${this.cardWayAPIUrl}payments/card${cardNumber}/${cardExpiry}/${cardCVC}`;
-    const response = HTTP.request(url, { method: "POST", body: { amount: booking.price, concept: booking.id } });
+    const response = Http.request(url, { method: "POST", body: { amount: booking.price, concept: booking.id } });
     if (response.status === 200) {
       return response.body ? (response.body.transactionID as string) : "";
     } else {
@@ -49,7 +49,7 @@ export class Payments {
   }
   private payWithPayMe(booking: Booking, payMeAccount: string, payMeCode: string) {
     const url = `${this.payMeAPIUrl}`;
-    const response = HTTP.request(url, {
+    const response = Http.request(url, {
       method: "POST",
       body: { payMeAccount, payMeCode, amount: booking.price, identification: booking.id },
     });
@@ -60,7 +60,7 @@ export class Payments {
     }
   }
   private payWithBank(booking: Booking, transferAccount: string) {
-    const smtp = new SMTP();
+    const smtp = new Smtp();
     const subject = `Payment request for Booking ${booking.id}`;
     const body = `Please transfer ${booking.price} to ${transferAccount}`;
     smtp.sendMail("payments@astrobookings.com", this.bankEmail, subject, body);

@@ -1,11 +1,11 @@
 import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
 import { PaymentMethod, Payments } from "./payments";
-import { SMTP } from "./smtp";
+import { Smtp } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 
-export class Bookings {
+export class BookingsService {
   private booking!: Booking;
   private trip!: Trip;
   private traveler!: Traveler;
@@ -33,20 +33,20 @@ export class Bookings {
     hasPremiumFoods: boolean,
     extraLuggageKilos: number,
   ): Booking {
-    // 🧼 early return
-    // 🧼 conditional validation on functions
+    // 🧼 🚿 early return
+    // 🧼 🚿 conditional validation on functions
     if (this.hasEntitiesId(travelerId, tripId) === false) {
       throw new Error("Invalid parameters");
     }
     this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
     this.save();
-    // 🧼 one condition per function
+    // 🧼 🚿 one condition per function
     this.pay(cardNumber, cardExpiry, cardCVC);
     return this.booking;
   }
 
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
-    // 🧼 conditional validation on functions
+    // 🧼 🚿 conditional validation on functions
     if (this.hasCreditCard(cardNumber, cardExpiry, cardCVC)) {
       this.payWithCreditCard(cardNumber, cardExpiry, cardCVC);
     } else {
@@ -55,7 +55,7 @@ export class Bookings {
   }
 
   private hasEntitiesId(travelerId: string, tripId: string): boolean {
-    return travelerId !== "" && tripId !== "";
+    return travelerId !== "" && tripId !== ""; // 🧼 🚿 complex conditionals closed inside functions
   }
 
   private hasCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string): boolean {
@@ -83,7 +83,7 @@ export class Bookings {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
     }
     const maxNonVipPassengersCount = 4;
-    // 🧼 conditional validation on functions
+    // 🧼 🚿 conditional validation on functions
     if (this.hasTooManyPassengersForNonVip(travelerId, passengersCount, maxNonVipPassengersCount)) {
       throw new Error(`No VIPs cant't have more than ${maxNonVipPassengersCount} passengers`);
     }
@@ -94,20 +94,21 @@ export class Bookings {
   }
 
   private hasTooManyPassengersForNonVip(travelerId: string, passengersCount: number, maxNonVipPassengersCount: number) {
-    // 🧼 one operator per statement
+    // 🧼 🚿 one operator per statement
     const isTooMuchForNonVip = passengersCount > maxNonVipPassengersCount;
-    return this.isNonVip(travelerId) && isTooMuchForNonVip;
+    const isNonVip = this.isNonVip(travelerId);
+    return isNonVip && isTooMuchForNonVip;
   }
 
   private isNonVip(travelerId: string): boolean {
     this.traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
-    return this.traveler.isVip;
+    return this.traveler.isVip == false;
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
     this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
-    const hasAvailableSeats = this.trip.availablePlaces >= passengersCount;
-    if (!hasAvailableSeats) {
+    const hasNoAvailableSeats = this.trip.availablePlaces < passengersCount;
+    if (hasNoAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
   }
@@ -119,7 +120,7 @@ export class Bookings {
   private payWithCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
     this.booking.price = this.calculatePrice();
     const paymentId = this.payPriceWithCard(cardNumber, cardExpiry, cardCVC);
-    // 🧼 conditional blocks on functions
+    // 🧼 🚿 conditional blocks on functions
     if (paymentId != "") {
       this.setPaymentStatus();
     } else {
@@ -145,7 +146,7 @@ export class Bookings {
 
   private processNonPayedBooking(cardNumber: string) {
     this.booking.status = BookingStatus.ERROR;
-    const smtp = new SMTP();
+    const smtp = new Smtp();
     smtp.sendMail(
       "payments@astrobookings.com",
       this.traveler.email,
@@ -160,7 +161,7 @@ export class Bookings {
   }
 
   private calculatePrice(): number {
-    // 🧼 large process divided in small ones
+    // 🧼 🚿 large process divided in small ones
     const millisecondsPerDay = this.calculateMillisecondsPerDay();
     const stayingNights = this.calculateStayingNights(millisecondsPerDay);
 
@@ -194,7 +195,7 @@ export class Bookings {
     const secondsPerMinute = 60;
     const minutesPerHour = 60;
     const hoursPerDay = 24;
-    // 🧼 one operator per statement
+    // 🧼 🚿 one operator per statement
     const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
     const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
     const millisecondsPerDay = millisecondsPerHour * hoursPerDay;

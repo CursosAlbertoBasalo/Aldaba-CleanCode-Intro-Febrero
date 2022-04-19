@@ -1,4 +1,4 @@
-export class SMTP {
+export class Smtp {
   private smtpServer = "smtp.astrobookings.com";
   private smtpPort = 25;
   private smtpSecurePort = 587;
@@ -14,26 +14,28 @@ export class SMTP {
     this.to = to;
     this.subject = subject;
     this.body = body;
-    const isAFakeCondition = true;
-    // 🧼 no flags as parameters
-    if (isAFakeCondition) {
-      return this.sendMailWithSMTP();
+    const needsSecureSmtp = true;
+    // 🧼 🚿 no flags as parameters
+    if (needsSecureSmtp) {
+      return this.sendMailWithSecureSmtp();
     } else {
-      return this.sendMailWithSecureSMTP();
+      return this.sendMailWithSmtp();
     }
   }
 
-  private sendMailWithSMTP(): string {
-    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
-
-    console.log(`Using ${this.smtpServer} port ${this.smtpPort}`);
-    return "250 OK";
-  }
-  private sendMailWithSecureSMTP(): string {
-    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
+  private sendMailWithSecureSmtp(): string {
+    console.log(
+      `Sending SECURED mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`,
+    );
     console.log(
       `Using ${this.smtpServer} port ${this.smtpSecurePort} user ${this.smtpUser} password ${this.smtpPassword}`,
     );
+    return "250 OK";
+  }
+  private sendMailWithSmtp(): string {
+    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
+
+    console.log(`Using ${this.smtpServer} port ${this.smtpPort}`);
     return "250 OK";
   }
 }

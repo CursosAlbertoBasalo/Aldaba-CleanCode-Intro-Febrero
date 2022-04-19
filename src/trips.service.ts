@@ -1,12 +1,12 @@
 import { Booking, BookingStatus } from "./booking";
 import { DB } from "./db";
-import { SMTP } from "./smtp";
+import { Smtp } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
-export class Trips {
+export class TripsService {
   public cancelTrip(tripId: string) {
-    // 🧼 same level of abstraction
+    // 🧼 🚿 same level of abstraction
     const trip: Trip = this.updateTripStatus(tripId);
     this.cancelBookings(tripId, trip);
   }
@@ -20,12 +20,12 @@ export class Trips {
 
   private cancelBookings(tripId: string, trip: Trip) {
     const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
-    // 🧼 early return and expressive conditional
+    // 🧼 🚿 early return and expressive conditional
     if (this.hasNoBookings(bookings)) {
       return;
     }
-    const smtp = new SMTP();
-    // 🧼 no nested structures nor complex blocks
+    const smtp = new Smtp();
+    // 🧼 🚿 no nested structures nor complex blocks
     for (const booking of bookings) {
       this.cancelBooking(booking, smtp, trip);
     }
@@ -35,12 +35,12 @@ export class Trips {
     return !bookings || bookings.length === 0;
   }
 
-  private cancelBooking(booking: Booking, smtp: SMTP, trip: Trip) {
+  private cancelBooking(booking: Booking, smtp: Smtp, trip: Trip) {
     this.updateBookingStatus(booking);
     this.notifyTraveler(booking, smtp, trip);
   }
 
-  private notifyTraveler(booking: Booking, smtp: SMTP, trip: Trip) {
+  private notifyTraveler(booking: Booking, smtp: Smtp, trip: Trip) {
     const traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
     if (!traveler) {
       return;
