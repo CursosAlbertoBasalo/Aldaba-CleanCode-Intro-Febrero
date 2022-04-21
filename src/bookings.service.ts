@@ -1,10 +1,11 @@
 import { Booking, BookingStatus } from "./booking";
-import { DB } from "./db";
+import { DataBase } from "./data_base";
 import { PaymentMethod, Payments } from "./payments";
 import { Smtp } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 
+// To Do: One level of abstraction
 export class BookingsService {
   private booking!: Booking;
   private trip!: Trip;
@@ -39,7 +40,7 @@ export class BookingsService {
       throw new Error("Invalid parameters");
     }
     this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
-    this.save();
+    this.booking.id = this.save();
     // 🧼 🚿 one condition per function
     this.pay(cardNumber, cardExpiry, cardCVC);
     return this.booking;
@@ -77,7 +78,6 @@ export class BookingsService {
   }
 
   private getValidatedPassengersCount(travelerId: string, passengersCount: number) {
-    // To Do: clean pending...
     const maxPassengersCount = 6;
     if (passengersCount > maxPassengersCount) {
       throw new Error(`Nobody can't have more than ${maxPassengersCount} passengers`);
@@ -101,20 +101,34 @@ export class BookingsService {
   }
 
   private isNonVip(travelerId: string): boolean {
-    this.traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
+    this.traveler = this.selectTraveler(travelerId);
     return this.traveler.isVip == false;
   }
 
   private checkAvailability(tripId: string, passengersCount: number) {
-    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    this.trip = this.selectTrip(tripId);
     const hasNoAvailableSeats = this.trip.availablePlaces < passengersCount;
     if (hasNoAvailableSeats) {
       throw new Error("There are no seats available in the trip");
     }
   }
 
+  // 🧼 🚿 low abstraction methods
+
+  private selectTrip(tripId: string) {
+    return DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+  }
+
+  private selectTraveler(travelerId: string) {
+    return DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
+  }
+
   private save() {
-    this.booking.id = DB.insert<Booking>(this.booking);
+    return DataBase.insert<Booking>(this.booking);
+  }
+
+  private update() {
+    DataBase.update(this.booking);
   }
 
   private payWithCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
@@ -126,7 +140,7 @@ export class BookingsService {
     } else {
       this.processNonPayedBooking(cardNumber);
     }
-    DB.update(this.booking);
+    this.update();
   }
 
   private payPriceWithCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
@@ -146,6 +160,11 @@ export class BookingsService {
 
   private processNonPayedBooking(cardNumber: string) {
     this.booking.status = BookingStatus.ERROR;
+    this.sendPaymentErrorEmail(cardNumber);
+  }
+
+  // 🧼 🚿 low abstraction SMTP
+  private sendPaymentErrorEmail(cardNumber: string) {
     const smtp = new Smtp();
     smtp.sendMail(
       "payments@astrobookings.com",

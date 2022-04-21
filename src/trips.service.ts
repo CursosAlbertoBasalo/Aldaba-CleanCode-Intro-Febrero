@@ -1,29 +1,23 @@
 import { Booking, BookingStatus } from "./booking";
-import { DB } from "./db";
+import { DataBase } from "./data_base";
 import { Smtp } from "./smtp";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
 export class TripsService {
   public cancelTrip(tripId: string) {
-    // 🧼 🚿 same level of abstraction
-    const trip: Trip = this.updateTripStatus(tripId);
-    this.cancelBookings(tripId, trip);
-  }
-
-  private updateTripStatus(tripId: string) {
-    const trip: Trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    // 🧼 🚿 same level of abstraction statements
+    const trip: Trip = this.selectTrip(tripId);
     trip.status = TripStatus.CANCELLED;
-    DB.update(trip);
-    return trip;
+    this.updateTrip(trip);
+    const bookings: Booking[] = this.selectBookings(tripId);
+    // 🧼 🚿 reduce nesting
+    if (bookings.length > 0) {
+      this.cancelBookings(bookings, trip);
+    }
   }
 
-  private cancelBookings(tripId: string, trip: Trip) {
-    const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
-    // 🧼 🚿 early return and expressive conditional
-    if (this.hasNoBookings(bookings)) {
-      return;
-    }
+  private cancelBookings(bookings: Booking[], trip: Trip) {
     const smtp = new Smtp();
     // 🧼 🚿 no nested structures nor complex blocks
     for (const booking of bookings) {
@@ -31,17 +25,14 @@ export class TripsService {
     }
   }
 
-  private hasNoBookings(bookings: Booking[]) {
-    return !bookings || bookings.length === 0;
-  }
-
   private cancelBooking(booking: Booking, smtp: Smtp, trip: Trip) {
-    this.updateBookingStatus(booking);
-    this.notifyTraveler(booking, smtp, trip);
+    booking.status = BookingStatus.CANCELLED;
+    this.updateBooking(booking);
+    this.notifyCancellation(booking, smtp, trip);
   }
 
-  private notifyTraveler(booking: Booking, smtp: Smtp, trip: Trip) {
-    const traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
+  private notifyCancellation(booking: Booking, smtp: Smtp, trip: Trip) {
+    const traveler = this.selectTraveler(booking.travelerId);
     if (!traveler) {
       return;
     }
@@ -52,9 +43,19 @@ export class TripsService {
       `Sorry, your trip ${trip.destination} has been cancelled.`,
     );
   }
-
-  private updateBookingStatus(booking: Booking) {
-    booking.status = BookingStatus.CANCELLED;
-    DB.update(booking);
+  private selectTrip(tripId: string) {
+    return DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`) as Trip;
+  }
+  private selectBookings(tripId: string) {
+    return DataBase.select("SELECT * FROM bookings WHERE trip_id = " + tripId) as Booking[];
+  }
+  private selectTraveler(travelerId: string) {
+    return DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`) as Traveler;
+  }
+  private updateTrip(trip: Trip) {
+    DataBase.update(trip);
+  }
+  private updateBooking(booking: Booking) {
+    DataBase.update(booking);
   }
 }

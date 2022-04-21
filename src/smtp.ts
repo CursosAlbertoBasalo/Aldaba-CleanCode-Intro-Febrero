@@ -2,6 +2,7 @@ export class Smtp {
   private smtpServer = "smtp.astrobookings.com";
   private smtpPort = 25;
   private smtpSecurePort = 587;
+  private smtpResultOk = "250 OK";
   private smtpUser = "Traveler assistant";
   private smtpPassword = "astrobookings";
   private from!: string;
@@ -30,12 +31,11 @@ export class Smtp {
     console.log(
       `Using ${this.smtpServer} port ${this.smtpSecurePort} user ${this.smtpUser} password ${this.smtpPassword}`,
     );
-    return "250 OK";
+    return this.smtpResultOk;
   }
   private sendMailWithSmtp(): string {
     console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
-
     console.log(`Using ${this.smtpServer} port ${this.smtpPort}`);
-    return "250 OK";
+    return this.smtpResultOk;
   }
 }
