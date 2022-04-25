@@ -1,11 +1,11 @@
-import { SMTP } from "./smtp";
+import { SmtpService } from "./smtp.service";
 export enum NotificationKinds {
   BOOKING_CONFIRMED,
   TRIP_CANCELLED,
   BANK_TRANSFER_REQUEST,
 }
 export class Notifications {
-  private smtp = new SMTP();
+  private smtp = new SmtpService();
 
   public notifyTripCancellation(travelerEmail: string, destination: string): string {
     return this.smtp.sendMail(
