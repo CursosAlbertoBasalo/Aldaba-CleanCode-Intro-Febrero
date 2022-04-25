@@ -1,15 +1,15 @@
-import { BookingsRequestDTO } from "./bookingsRequestDTO";
-import { CreditCardVO } from "./creditCardVO";
+import { BookingsRequestDto } from "./bookings_request.dto";
+import { CreditCardVo } from "./credit_card.vo";
 
-export class BookingsRequestVO {
+export class BookingsRequestVo {
   travelerId: string;
   tripId: string;
   passengersCount: number;
-  card: CreditCardVO;
+  card: CreditCardVo;
   hasPremiumFoods: boolean;
   extraLuggageKilos: number;
 
-  constructor(bookingsRequestDTO: BookingsRequestDTO) {
+  constructor(bookingsRequestDTO: BookingsRequestDto) {
     if (this.hasEntitiesId(bookingsRequestDTO) === false) {
       throw new Error("Invalid parameters");
     }
@@ -19,7 +19,7 @@ export class BookingsRequestVO {
     this.travelerId = bookingsRequestDTO.travelerId;
     this.tripId = bookingsRequestDTO.tripId;
     this.passengersCount = bookingsRequestDTO.passengersCount;
-    this.card = new CreditCardVO(
+    this.card = new CreditCardVo(
       bookingsRequestDTO.cardNumber,
       bookingsRequestDTO.cardExpiry,
       bookingsRequestDTO.cardCVC,
@@ -28,7 +28,7 @@ export class BookingsRequestVO {
     this.extraLuggageKilos = bookingsRequestDTO.extraLuggageKilos;
   }
 
-  private hasEntitiesId(bookingsRequestDTO: BookingsRequestDTO): boolean {
+  private hasEntitiesId(bookingsRequestDTO: BookingsRequestDto): boolean {
     return bookingsRequestDTO.travelerId !== "" && bookingsRequestDTO.tripId !== "";
   }
 }

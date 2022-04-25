@@ -1,4 +1,4 @@
-export class DB {
+export class DataBase {
   public static select<T>(query: string): T[] {
     console.log(query);
     return [];

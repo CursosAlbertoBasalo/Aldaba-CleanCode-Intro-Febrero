@@ -1,6 +1,6 @@
 import { Email } from "./email";
 
-export class SMTP {
+export class SmtpService {
   private smtpServer = "smtp.astrobookings.com";
   private smtpPort = 25;
   private smtpSecurePort = 587;

@@ -1,11 +1,5 @@
-export enum BookingStatus {
-  REQUESTED,
-  PAID,
-  RESERVED,
-  NOTIFIED_RESERVATION,
-  ERROR,
-  CANCELLED,
-}
+import { BookingStatus } from "./booking_status.enum";
+
 export class Booking {
   public id: string | undefined;
   public tripId: string;

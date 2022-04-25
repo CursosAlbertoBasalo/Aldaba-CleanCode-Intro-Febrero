@@ -1,15 +1,12 @@
 import { Booking } from "./booking";
-import { BookingPaymentDTO } from "./bookingPaymentDTO";
-import { CreditCardVO } from "./creditCardVO";
-import { HTTP } from "./http";
-import { Notifications } from "./notifications";
-import { PayMeDTO } from "./payMeDTO";
-export enum PaymentMethod {
-  CREDIT_CARD,
-  PAY_ME,
-  TRANSFER,
-}
-export class Payments {
+import { BookingPaymentDto } from "./booking_payment.dto";
+import { CreditCardVo } from "./credit_card.vo";
+import { HttpService } from "./http.service";
+import { NotificationsService } from "./notifications.service";
+import { PaymentMethod } from "./payment_method.enum";
+import { PayMeDto } from "./pay_me.dto";
+
+export class PaymentsService {
   private cardWayAPIUrl = "https://card-way.com/";
   private payMeAPIUrl = "https://pay-me.com/v1/payments";
   private bankEmail = "humanprocessor@bancka.com";
@@ -20,7 +17,7 @@ export class Payments {
 
   constructor(private booking: Booking) {}
 
-  public payBooking(bookingPayment: BookingPaymentDTO): string {
+  public payBooking(bookingPayment: BookingPaymentDto): string {
     switch (bookingPayment.method) {
       case PaymentMethod.CREDIT_CARD:
         return this.payWithCard(bookingPayment.creditCard);
@@ -32,12 +29,12 @@ export class Payments {
         throw new Error(`Unknown payment method: ${bookingPayment.method}`);
     }
   }
-  private payWithCard(creditCard?: CreditCardVO) {
+  private payWithCard(creditCard?: CreditCardVo) {
     if (creditCard === undefined) {
       throw new Error("Missing credit card");
     }
     const url = `${this.cardWayAPIUrl}payments/card${creditCard.number}/${creditCard.expiration}/${creditCard.cvv}`;
-    const response = HTTP.request({
+    const response = HttpService.request({
       url,
       options: { method: "POST", body: { amount: this.booking.price, concept: this.booking.id } },
     });
@@ -47,12 +44,12 @@ export class Payments {
       return "";
     }
   }
-  private payWithPayMe(payMe?: PayMeDTO) {
+  private payWithPayMe(payMe?: PayMeDto) {
     if (payMe === undefined) {
       throw new Error("PayMe is undefined");
     }
     const url = `${this.payMeAPIUrl}`;
-    const response = HTTP.request({
+    const response = HttpService.request({
       url,
       options: this.buildOptions(payMe),
     });
@@ -62,7 +59,7 @@ export class Payments {
       return "";
     }
   }
-  private buildOptions(payMe: PayMeDTO): unknown {
+  private buildOptions(payMe: PayMeDto): unknown {
     return {
       method: "POST",
       body: {
@@ -81,7 +78,7 @@ export class Payments {
     if (this.booking.id === null || this.booking.id === undefined) {
       throw new Error("Booking id is null or undefined");
     }
-    const notifications = new Notifications();
+    const notifications = new NotificationsService();
     return notifications.notifyBankTransfer({
       recipient: this.bankEmail,
       bookingId: this.booking.id,

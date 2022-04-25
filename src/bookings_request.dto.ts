@@ -1,6 +1,6 @@
 // 🧼 Data transfer object to avoid primitive types in the code
 
-export type BookingsRequestDTO = {
+export type BookingsRequestDto = {
   travelerId: string; // - the id of the traveler soliciting the booking
   tripId: string; // - the id of the trip to book
   passengersCount: number; // - the number of passengers to reserve

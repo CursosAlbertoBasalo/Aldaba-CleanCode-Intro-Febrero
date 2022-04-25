@@ -1,13 +1,14 @@
-import { Booking, BookingStatus } from "./booking";
-import { DateRangeVO } from "./dateRangeVO";
-import { DB } from "./db";
-import { FindTripsDTO } from "./findTripsDTO";
-import { Notifications } from "./notifications";
-import { SMTP } from "./smtp";
+import { Booking } from "./booking";
+import { BookingStatus } from "./booking_status.enum";
+import { DataBase } from "./data_base";
+import { DateRangeVo } from "./date_range.vo";
+import { FindTripsDto } from "./find_trips.dto";
+import { NotificationsService } from "./notifications.service";
+import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
-export class Trips {
+export class TripsService {
   private tripId = "";
   private trip!: Trip;
   public cancelTrip(tripId: string) {
@@ -17,28 +18,28 @@ export class Trips {
     this.cancelBookings();
   }
 
-  public findTrips(findTripsDTO: FindTripsDTO): Trip[] {
+  public findTrips(findTripsDTO: FindTripsDto): Trip[] {
     // 🧼 date range ensures the range is valid
-    const dates = new DateRangeVO(findTripsDTO.startDate, findTripsDTO.endDate);
-    const trips: Trip[] = DB.select(
+    const dates = new DateRangeVo(findTripsDTO.startDate, findTripsDTO.endDate);
+    const trips: Trip[] = DataBase.select(
       `SELECT * FROM trips WHERE destination = '${findTripsDTO.destination}' AND start_date >= '${dates.start}' AND end_date <= '${dates.end}'`,
     );
     return trips;
   }
 
   private updateTripStatus() {
-    const trip: Trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.tripId}'`);
+    const trip: Trip = DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.tripId}'`);
     trip.status = TripStatus.CANCELLED;
-    DB.update(trip);
+    DataBase.update(trip);
     return trip;
   }
 
   private cancelBookings() {
-    const bookings: Booking[] = DB.select("SELECT * FROM bookings WHERE trip_id = " + this.tripId);
+    const bookings: Booking[] = DataBase.select("SELECT * FROM bookings WHERE trip_id = " + this.tripId);
     if (this.hasNoBookings(bookings)) {
       return;
     }
-    const smtp = new SMTP();
+    const smtp = new SmtpService();
     for (const booking of bookings) {
       this.cancelBooking(booking, smtp, this.trip);
     }
@@ -48,17 +49,17 @@ export class Trips {
     return !bookings || bookings.length === 0;
   }
 
-  private cancelBooking(booking: Booking, smtp: SMTP, trip: Trip) {
+  private cancelBooking(booking: Booking, smtp: SmtpService, trip: Trip) {
     this.updateBookingStatus(booking);
     this.notifyTraveler(booking, smtp, trip);
   }
 
-  private notifyTraveler(booking: Booking, smtp: SMTP, trip: Trip) {
-    const traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
+  private notifyTraveler(booking: Booking, smtp: SmtpService, trip: Trip) {
+    const traveler = DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
     if (!traveler) {
       return;
     }
-    const notifications = new Notifications();
+    const notifications = new NotificationsService();
     notifications.notifyTripCancellation({
       recipient: traveler.email,
       tripDestination: trip.destination,
@@ -68,6 +69,6 @@ export class Trips {
 
   private updateBookingStatus(booking: Booking) {
     booking.status = BookingStatus.CANCELLED;
-    DB.update(booking);
+    DataBase.update(booking);
   }
 }

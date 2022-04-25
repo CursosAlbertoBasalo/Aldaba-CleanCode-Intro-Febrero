@@ -8,7 +8,7 @@ type HttpRequest = {
   options: unknown;
 };
 
-export class HTTP {
+export class HttpService {
   static request(httpRequest: HttpRequest): HttpResponse {
     console.log(httpRequest);
     return { url: httpRequest.url, status: 200, body: { data: {} } };

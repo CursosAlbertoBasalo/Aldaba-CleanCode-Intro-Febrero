@@ -1,20 +1,22 @@
-import { Booking, BookingStatus } from "./booking";
-import { BookingsRequestDTO } from "./bookingsRequestDTO";
-import { BookingsRequestVO } from "./bookingsRequestVO";
-import { CreditCardVO } from "./creditCardVO";
-import { DateRangeVO } from "./dateRangeVO";
-import { DB } from "./db";
-import { Notifications } from "./notifications";
-import { PaymentMethod, Payments } from "./payments";
-import { SMTP } from "./smtp";
+import { Booking } from "./booking";
+import { BookingsRequestDto } from "./bookings_request.dto";
+import { BookingsRequestVo } from "./bookings_request.vo";
+import { BookingStatus } from "./booking_status.enum";
+import { CreditCardVo } from "./credit_card.vo";
+import { DataBase } from "./data_base";
+import { DateRangeVo } from "./date_range.vo";
+import { NotificationsService } from "./notifications.service";
+import { PaymentsService } from "./payments.service";
+import { PaymentMethod } from "./payment_method.enum";
+import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 
-export class Bookings {
+export class BookingsService {
   private booking!: Booking;
   private trip!: Trip;
   private traveler!: Traveler;
-  private bookingsRequest!: BookingsRequestVO;
+  private bookingsRequest!: BookingsRequestVo;
 
   /**
    * Requests a new booking
@@ -22,10 +24,10 @@ export class Bookings {
    * @returns {Booking} the new booking object
    * @throws {Error} if the booking is not possible
    */
-  public request(bookingsRequestDTO: BookingsRequestDTO): Booking {
+  public request(bookingsRequestDTO: BookingsRequestDto): Booking {
     // 🧼 Data transfer object to avoid multiple parameters on methods signatures
     // 🧼 Saved as a property on the class to reduce method parameters
-    this.bookingsRequest = new BookingsRequestVO(bookingsRequestDTO);
+    this.bookingsRequest = new BookingsRequestVo(bookingsRequestDTO);
     this.create();
     this.save();
     this.pay();
@@ -36,7 +38,7 @@ export class Bookings {
     if (this.booking.id === undefined) {
       return;
     }
-    const notifications = new Notifications();
+    const notifications = new NotificationsService();
     return notifications.notifyBookingConfirmation({
       recipient: this.traveler.email,
       tripDestination: this.trip.destination,
@@ -49,7 +51,7 @@ export class Bookings {
       this.payWithCreditCard(this.bookingsRequest.card);
     } catch (error) {
       this.booking.status = BookingStatus.ERROR;
-      DB.update(this.booking);
+      DataBase.update(this.booking);
       throw error;
     }
   }
@@ -92,12 +94,12 @@ export class Bookings {
   }
 
   private isNonVip(travelerId: string): boolean {
-    this.traveler = DB.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
+    this.traveler = DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`);
     return this.traveler.isVip;
   }
 
   private checkAvailability() {
-    this.trip = DB.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.bookingsRequest.tripId}'`);
+    this.trip = DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${this.bookingsRequest.tripId}'`);
     const hasAvailableSeats = this.trip.availablePlaces >= this.bookingsRequest.passengersCount;
     if (!hasAvailableSeats) {
       throw new Error("There are no seats available in the trip");
@@ -105,10 +107,10 @@ export class Bookings {
   }
 
   private save() {
-    this.booking.id = DB.insert<Booking>(this.booking);
+    this.booking.id = DataBase.insert<Booking>(this.booking);
   }
 
-  private payWithCreditCard(creditCard: CreditCardVO) {
+  private payWithCreditCard(creditCard: CreditCardVo) {
     this.booking.price = this.calculatePrice();
     const paymentId = this.payPriceWithCard(creditCard);
     if (paymentId != "") {
@@ -116,11 +118,11 @@ export class Bookings {
     } else {
       this.processNonPayedBooking(creditCard.number);
     }
-    DB.update(this.booking);
+    DataBase.update(this.booking);
   }
 
-  private payPriceWithCard(creditCard: CreditCardVO) {
-    const payments = new Payments(this.booking);
+  private payPriceWithCard(creditCard: CreditCardVo) {
+    const payments = new PaymentsService(this.booking);
     const paymentId = payments.payBooking({
       method: PaymentMethod.CREDIT_CARD,
       creditCard,
@@ -132,7 +134,7 @@ export class Bookings {
 
   private processNonPayedBooking(cardNumber: string) {
     this.booking.status = BookingStatus.ERROR;
-    const smtp = new SMTP();
+    const smtp = new SmtpService();
     smtp.sendMail({
       from: "payments@astrobookings.com",
       to: this.traveler.email,
@@ -147,7 +149,7 @@ export class Bookings {
   }
 
   private calculatePrice(): number {
-    const stayingNights = new DateRangeVO(this.trip.startDate, this.trip.endDate).toWholeDays;
+    const stayingNights = new DateRangeVo(this.trip.startDate, this.trip.endDate).toWholeDays;
     const passengerPrice = this.calculatePassengerPrice(stayingNights);
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     const extraTripPrice = this.calculateExtraPricePerTrip();

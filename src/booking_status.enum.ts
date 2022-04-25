@@ -1,0 +1,8 @@
+export enum BookingStatus {
+  REQUESTED,
+  PAID,
+  RESERVED,
+  NOTIFIED_RESERVATION,
+  ERROR,
+  CANCELLED,
+}
