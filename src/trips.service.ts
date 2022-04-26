@@ -1,40 +1,64 @@
-export class Smtp {
-  private smtpServer = "smtp.astrobookings.com";
-  private smtpPort = 25;
-  private smtpSecurePort = 587;
-  private smtpResultOk = "250 OK";
-  private smtpUser = "Traveler assistant";
-  private smtpPassword = "astrobookings";
-  private from!: string;
-  private to!: string;
-  private subject!: string;
-  private body!: string;
+import { Booking, BookingStatus } from "./booking";
+import { DataBase } from "./data_base";
+import { NotificationsService } from "./notifications.service";
+import { SmtpService } from "./smtp.service";
+import { Traveler } from "./traveler";
+import { Trip, TripStatus } from "./trip";
 
-  public sendMail(from: string, to: string, subject: string, body: string): string {
-    this.from = from;
-    this.to = to;
-    this.subject = subject;
-    this.body = body;
-    const needsSecureSmtp = true;
-    if (needsSecureSmtp) {
-      return this.sendMailWithSecureSmtp();
-    } else {
-      return this.sendMailWithSmtp();
+export class Trips {
+  public cancelTrip(tripId: string) {
+    const trip: Trip = this.updateTripStatus(tripId);
+    this.cancelBookings(tripId, trip);
+  }
+
+  public findTrips(destination: string, startDate: string, endDate: string): Trip[] {
+    if (startDate < endDate) {
+      throw new Error("Start date must be before end date");
+    }
+    const trips: Trip[] = DataBase.select(
+      `SELECT * FROM trips WHERE destination = '${destination}' AND start_date >= '${startDate}' AND end_date <= '${endDate}'`,
+    );
+    return trips;
+  }
+
+  private updateTripStatus(tripId: string) {
+    const trip: Trip = DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    trip.status = TripStatus.CANCELLED;
+    DataBase.update(trip);
+    return trip;
+  }
+
+  private cancelBookings(tripId: string, trip: Trip) {
+    const bookings: Booking[] = DataBase.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
+    if (this.hasNoBookings(bookings)) {
+      return;
+    }
+    const smtp = new SmtpService();
+    for (const booking of bookings) {
+      this.cancelBooking(booking, smtp, trip);
     }
   }
 
-  private sendMailWithSecureSmtp(): string {
-    console.log(
-      `Sending SECURED mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`,
-    );
-    console.log(
-      `Using ${this.smtpServer} port ${this.smtpSecurePort} user ${this.smtpUser} password ${this.smtpPassword}`,
-    );
-    return this.smtpResultOk;
+  private hasNoBookings(bookings: Booking[]) {
+    return !bookings || bookings.length === 0;
   }
-  private sendMailWithSmtp(): string {
-    console.log(`Sending mail from ${this.from} to ${this.to} with subject ${this.subject} and body ${this.body}`);
-    console.log(`Using ${this.smtpServer} port ${this.smtpPort}`);
-    return this.smtpResultOk;
+
+  private cancelBooking(booking: Booking, smtp: SmtpService, trip: Trip) {
+    this.updateBookingStatus(booking);
+    this.notifyTraveler(booking, trip);
+  }
+
+  private notifyTraveler(booking: Booking, trip: Trip) {
+    const traveler = DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
+    if (!traveler) {
+      return;
+    }
+    const notifications = new NotificationsService();
+    notifications.notifyTripCancellation(traveler.email, trip.destination);
+  }
+
+  private updateBookingStatus(booking: Booking) {
+    booking.status = BookingStatus.CANCELLED;
+    DataBase.update(booking);
   }
 }

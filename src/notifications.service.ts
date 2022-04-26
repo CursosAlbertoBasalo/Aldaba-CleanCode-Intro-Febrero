@@ -4,7 +4,7 @@ export enum NotificationKinds {
   TRIP_CANCELLED,
   BANK_TRANSFER_REQUEST,
 }
-export class Notifications {
+export class NotificationsService {
   private smtp = new SmtpService();
 
   public notifyTripCancellation(travelerEmail: string, destination: string): string {

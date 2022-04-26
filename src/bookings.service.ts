@@ -1,5 +1,6 @@
 import { Booking, BookingStatus } from "./booking";
 import { DataBase } from "./data_base";
+import { NotificationsService } from "./notifications.service";
 import { PaymentMethod, PaymentsService } from "./payments.service";
 import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
@@ -39,7 +40,16 @@ export class BookingsService {
     this.create(travelerId, tripId, passengersCount, hasPremiumFoods, extraLuggageKilos);
     this.booking.id = this.save();
     this.pay(cardNumber, cardExpiry, cardCVC);
+    this.notify();
     return this.booking;
+  }
+
+  private notify() {
+    if (this.booking.id === undefined) {
+      return;
+    }
+    const notifications = new NotificationsService();
+    return notifications.notifyBookingConfirmation(this.traveler.email, this.trip.destination, this.booking.id);
   }
 
   private pay(cardNumber: string, cardExpiry: string, cardCVC: string) {
