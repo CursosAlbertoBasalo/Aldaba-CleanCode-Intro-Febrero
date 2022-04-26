@@ -1,4 +1,4 @@
-export class Traveler {
+export class TravelerDto {
   public id: string | undefined;
   public name: string;
   public email: string;

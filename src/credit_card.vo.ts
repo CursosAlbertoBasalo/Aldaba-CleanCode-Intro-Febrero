@@ -1,3 +1,4 @@
+// 🧼 🚿 Inmutable validated and formatted credit card info
 export class CreditCardVo {
   public get toHumanReadable(): string {
     return `${this.number} expires on ${this.expiration}`;

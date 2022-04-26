@@ -1,6 +1,6 @@
 import { BookingStatus } from "./booking_status.enum";
 
-export class Booking {
+export class BookingDto {
   public id: string | undefined;
   public tripId: string;
   public travelerId: string;

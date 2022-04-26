@@ -1,4 +1,4 @@
-import { Email } from "./email";
+import { EmailDto } from "./email.dto";
 
 export class SmtpService {
   private smtpServer = "smtp.astrobookings.com";
@@ -6,9 +6,9 @@ export class SmtpService {
   private smtpSecurePort = 587;
   private smtpUser = "Traveler assistant";
   private smtpPassword = "astrobookings";
-  private email!: Email;
+  private email!: EmailDto;
 
-  public sendMail(email: Email): string {
+  public sendMail(email: EmailDto): string {
     this.email = email;
     const isAFakeCondition = true;
     if (isAFakeCondition) {

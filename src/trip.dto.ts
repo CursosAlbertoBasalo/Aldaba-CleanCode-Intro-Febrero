@@ -1,15 +1,7 @@
-export enum TripKinds {
-  TRIP_ONLY,
-  WITH_STAY,
-}
+import { TripKinds } from "./trip_kinds.enum";
+import { TripStatus } from "./trip_status.enum";
 
-export enum TripStatus {
-  WAITING,
-  CANCELLED,
-  CONFIRMED,
-}
-
-export class Trip {
+export class TripDto {
   public id: string | undefined;
   public operatorId: string;
   public operatorTripCode: string | undefined;

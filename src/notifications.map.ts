@@ -1,6 +1,8 @@
 import { NotificationKinds } from "./notification_kinds.enum";
+// 🧼 🚿 Using an array as a map for avoid switches
+// could be a dictionary or any other list structure
 
-export const NotificationsMap = [
+export const notificationsMap = [
   {
     kind: NotificationKinds.BANK_TRANSFER_REQUEST,
     sender: "payments@astrobookings.com",
