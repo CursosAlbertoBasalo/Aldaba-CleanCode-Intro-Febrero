@@ -17,6 +17,7 @@ export class PaymentsService {
 
   constructor(private booking: Booking) {}
 
+  // ToDo: 🔥 remove switch flag, and call proper methods instead 🔥
   public payBooking(bookingPayment: BookingPaymentDto): string {
     switch (bookingPayment.method) {
       case PaymentMethod.CREDIT_CARD:
@@ -29,7 +30,7 @@ export class PaymentsService {
         throw new Error(`Unknown payment method: ${bookingPayment.method}`);
     }
   }
-  private payWithCard(creditCard?: CreditCardVo) {
+  public payWithCard(creditCard?: CreditCardVo) {
     if (creditCard === undefined) {
       throw new Error("Missing credit card");
     }
@@ -44,7 +45,7 @@ export class PaymentsService {
       return "";
     }
   }
-  private payWithPayMe(payMe?: PayMeDto) {
+  public payWithPayMe(payMe?: PayMeDto) {
     if (payMe === undefined) {
       throw new Error("PayMe is undefined");
     }
@@ -59,7 +60,7 @@ export class PaymentsService {
       return "";
     }
   }
-  private buildOptions(payMe: PayMeDto): unknown {
+  public buildOptions(payMe: PayMeDto): unknown {
     return {
       method: "POST",
       body: {
