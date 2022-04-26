@@ -61,7 +61,7 @@ export class BookingsService {
   }
 
   private hasEntitiesId(travelerId: string, tripId: string): boolean {
-    return travelerId !== "" && tripId !== ""; // 🧼 🚿 complex conditionals closed inside functions
+    return travelerId !== "" && tripId !== "";
   }
 
   private hasCreditCard(cardNumber: string, cardExpiry: string, cardCVC: string): boolean {
@@ -155,6 +155,7 @@ export class BookingsService {
       "",
       "",
     );
+
     return paymentId;
   }
 
@@ -181,10 +182,10 @@ export class BookingsService {
   private calculatePrice(): number {
     const millisecondsPerDay = this.calculateMillisecondsPerDay();
     const stayingNights = this.calculateStayingNights(millisecondsPerDay);
-
     const passengerPrice = this.calculatePassengerPrice(stayingNights);
     const passengersPrice = passengerPrice * this.booking.passengersCount;
     const extraTripPrice = this.calculateExtraPricePerTrip();
+
     return passengersPrice + extraTripPrice;
   }
 
@@ -197,6 +198,7 @@ export class BookingsService {
     const premiumFoodsPrice = this.booking.hasPremiumFoods ? this.trip.premiumFoodPrice : 0;
     const flightPrice = this.trip.flightPrice + premiumFoodsPrice;
     const passengerPrice = flightPrice + stayingPrice;
+
     return passengerPrice;
   }
 
@@ -204,6 +206,7 @@ export class BookingsService {
     const millisecondsTripDuration = this.trip.endDate.getTime() - this.trip.startDate.getTime();
     const rawStayingNights = millisecondsTripDuration / millisecondsPerDay;
     const stayingNights = Math.round(rawStayingNights);
+
     return stayingNights;
   }
 
@@ -216,6 +219,7 @@ export class BookingsService {
     const millisecondsPerMinute = millisecondsPerSecond * secondsPerMinute;
     const millisecondsPerHour = millisecondsPerMinute * minutesPerHour;
     const millisecondsPerDay = millisecondsPerHour * hoursPerDay;
+
     return millisecondsPerDay;
   }
 }

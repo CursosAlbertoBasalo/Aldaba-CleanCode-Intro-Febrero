@@ -3,7 +3,7 @@
 /* eslint-disable max-lines-per-function */
 import { Booking } from "./booking";
 import { HttpService } from "./http.service";
-import { SmtpService } from "./smtp.service";
+import { NotificationsService } from "./notifications.service";
 
 export enum PaymentMethod {
   CREDIT_CARD,
@@ -52,11 +52,11 @@ export class PaymentsService {
         }
       }
       case PaymentMethod.TRANSFER: {
-        const smtp = new SmtpService();
-        const subject = `Payment request for Booking ${booking.id}`;
-        const body = `Please transfer ${booking.price} to ${transferAccount}`;
-        smtp.sendMail("payments@astrobookings.com", this.bankEmail, subject, body);
-        return "";
+        if (booking.id === null || booking.id === undefined) {
+          throw new Error("Booking id is null or undefined");
+        }
+        const notifications = new NotificationsService();
+        return notifications.notifyBankTransfer(this.bankEmail, booking.id, booking.price, transferAccount);
       }
       default:
         throw new Error(`Unknown payment method: ${method}`);
