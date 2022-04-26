@@ -1,64 +1,63 @@
 import { Booking, BookingStatus } from "./booking";
 import { DataBase } from "./data_base";
-import { NotificationsService } from "./notifications.service";
 import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
-export class Trips {
+export class TripsService {
   public cancelTrip(tripId: string) {
-    const trip: Trip = this.updateTripStatus(tripId);
-    this.cancelBookings(tripId, trip);
-  }
-
-  public findTrips(destination: string, startDate: string, endDate: string): Trip[] {
-    if (startDate < endDate) {
-      throw new Error("Start date must be before end date");
-    }
-    const trips: Trip[] = DataBase.select(
-      `SELECT * FROM trips WHERE destination = '${destination}' AND start_date >= '${startDate}' AND end_date <= '${endDate}'`,
-    );
-    return trips;
-  }
-
-  private updateTripStatus(tripId: string) {
-    const trip: Trip = DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`);
+    const trip: Trip = this.selectTrip(tripId);
     trip.status = TripStatus.CANCELLED;
-    DataBase.update(trip);
-    return trip;
+    this.updateTrip(trip);
+    const bookings: Booking[] = this.selectBookings(tripId);
+    if (bookings.length > 0) {
+      this.cancelBookings(bookings, trip);
+    }
   }
 
-  private cancelBookings(tripId: string, trip: Trip) {
-    const bookings: Booking[] = DataBase.select("SELECT * FROM bookings WHERE trip_id = " + tripId);
-    if (this.hasNoBookings(bookings)) {
-      return;
-    }
+  private cancelBookings(bookings: Booking[], trip: Trip) {
     const smtp = new SmtpService();
     for (const booking of bookings) {
       this.cancelBooking(booking, smtp, trip);
     }
   }
 
-  private hasNoBookings(bookings: Booking[]) {
-    return !bookings || bookings.length === 0;
-  }
-
   private cancelBooking(booking: Booking, smtp: SmtpService, trip: Trip) {
-    this.updateBookingStatus(booking);
-    this.notifyTraveler(booking, trip);
+    booking.status = BookingStatus.CANCELLED;
+    this.updateBooking(booking);
+    this.notifyCancellation(booking, smtp, trip);
   }
 
-  private notifyTraveler(booking: Booking, trip: Trip) {
-    const traveler = DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${booking.travelerId}'`);
+  private notifyCancellation(booking: Booking, smtp: SmtpService, trip: Trip) {
+    const traveler = this.selectTraveler(booking.travelerId);
     if (!traveler) {
       return;
     }
-    const notifications = new NotificationsService();
-    notifications.notifyTripCancellation(traveler.email, trip.destination);
+    this.sendCancellationEmail(smtp, traveler, trip);
   }
 
-  private updateBookingStatus(booking: Booking) {
-    booking.status = BookingStatus.CANCELLED;
+  private sendCancellationEmail(smtp: SmtpService, traveler: Traveler, trip: Trip) {
+    smtp.sendMail(
+      "trips@astrobookings.com",
+      traveler.email,
+      "Trip cancelled",
+      `Sorry, your trip ${trip.destination} has been cancelled.`,
+    );
+  }
+
+  private selectTrip(tripId: string) {
+    return DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`) as Trip;
+  }
+  private selectBookings(tripId: string) {
+    return DataBase.select("SELECT * FROM bookings WHERE trip_id = " + tripId) as Booking[];
+  }
+  private selectTraveler(travelerId: string) {
+    return DataBase.selectOne<Traveler>(`SELECT * FROM travelers WHERE id = '${travelerId}'`) as Traveler;
+  }
+  private updateTrip(trip: Trip) {
+    DataBase.update(trip);
+  }
+  private updateBooking(booking: Booking) {
     DataBase.update(booking);
   }
 }

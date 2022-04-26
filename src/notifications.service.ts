@@ -31,6 +31,7 @@ export class NotificationsService {
       `Enjoy your tip to ${destination}!`,
     );
   }
+
   private getSender(kind: NotificationKinds): string {
     switch (kind) {
       case NotificationKinds.BOOKING_CONFIRMED:
