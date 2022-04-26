@@ -1,11 +1,10 @@
 import { Booking, BookingStatus } from "./booking";
 import { DataBase } from "./data_base";
-import { PaymentMethod, Payments } from "./payments";
-import { Smtp } from "./smtp";
+import { PaymentMethod, PaymentsService } from "./payments.service";
+import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
 
-// To Do: One level of abstraction
 export class BookingsService {
   private booking!: Booking;
   private trip!: Trip;
@@ -144,8 +143,8 @@ export class BookingsService {
   }
 
   private payPriceWithCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
-    const payments = new Payments();
-    const paymentId = payments.payBooking(
+    const paymentsService = new PaymentsService();
+    const paymentId = paymentsService.payBooking(
       this.booking,
       PaymentMethod.CREDIT_CARD,
       cardNumber,
@@ -165,7 +164,7 @@ export class BookingsService {
 
   // 🧼 🚿 low abstraction SMTP
   private sendPaymentErrorEmail(cardNumber: string) {
-    const smtp = new Smtp();
+    const smtp = new SmtpService();
     smtp.sendMail(
       "payments@astrobookings.com",
       this.traveler.email,

@@ -1,4 +1,4 @@
-export class Smtp {
+export class SmtpService {
   private smtpServer = "smtp.astrobookings.com";
   private smtpPort = 25;
   private smtpSecurePort = 587;

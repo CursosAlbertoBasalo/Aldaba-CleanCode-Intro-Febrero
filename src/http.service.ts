@@ -3,10 +3,10 @@ export class Response {
   public status: number | undefined;
   public body: Record<string, unknown> | undefined;
 }
-export class Http {
+export class HttpService {
   static readonly responseOk = 200;
   static request(url: string, options: unknown): Response {
     console.log(url, options);
-    return { url, status: Http.responseOk, body: { data: {} } };
+    return { url, status: HttpService.responseOk, body: { data: {} } };
   }
 }

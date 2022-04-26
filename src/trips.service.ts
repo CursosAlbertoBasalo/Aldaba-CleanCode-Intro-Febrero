@@ -1,6 +1,6 @@
 import { Booking, BookingStatus } from "./booking";
 import { DataBase } from "./data_base";
-import { Smtp } from "./smtp";
+import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip, TripStatus } from "./trip";
 
@@ -18,24 +18,29 @@ export class TripsService {
   }
 
   private cancelBookings(bookings: Booking[], trip: Trip) {
-    const smtp = new Smtp();
+    const smtp = new SmtpService();
     // 🧼 🚿 no nested structures nor complex blocks
     for (const booking of bookings) {
       this.cancelBooking(booking, smtp, trip);
     }
   }
 
-  private cancelBooking(booking: Booking, smtp: Smtp, trip: Trip) {
+  private cancelBooking(booking: Booking, smtp: SmtpService, trip: Trip) {
     booking.status = BookingStatus.CANCELLED;
     this.updateBooking(booking);
     this.notifyCancellation(booking, smtp, trip);
   }
 
-  private notifyCancellation(booking: Booking, smtp: Smtp, trip: Trip) {
+  private notifyCancellation(booking: Booking, smtp: SmtpService, trip: Trip) {
     const traveler = this.selectTraveler(booking.travelerId);
     if (!traveler) {
       return;
     }
+    this.sendCancellationEmail(smtp, traveler, trip);
+  }
+
+  // 🧼 🚿 same level of abstraction functions
+  private sendCancellationEmail(smtp: SmtpService, traveler: Traveler, trip: Trip) {
     smtp.sendMail(
       "trips@astrobookings.com",
       traveler.email,
@@ -43,6 +48,7 @@ export class TripsService {
       `Sorry, your trip ${trip.destination} has been cancelled.`,
     );
   }
+
   private selectTrip(tripId: string) {
     return DataBase.selectOne<Trip>(`SELECT * FROM trips WHERE id = '${tripId}'`) as Trip;
   }
