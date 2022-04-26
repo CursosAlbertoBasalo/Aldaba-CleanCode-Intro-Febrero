@@ -1,6 +1,6 @@
 import { Booking, BookingStatus } from "./booking";
 import { DataBase } from "./data_base";
-import { PaymentMethod, PaymentsService } from "./payments.service";
+import { PaymentsService } from "./payments.service";
 import { SmtpService } from "./smtp.service";
 import { Traveler } from "./traveler";
 import { Trip } from "./trip";
@@ -144,16 +144,7 @@ export class BookingsService {
 
   private payPriceWithCard(cardNumber: string, cardExpiry: string, cardCVC: string) {
     const paymentsService = new PaymentsService();
-    const paymentId = paymentsService.payBooking(
-      this.booking,
-      PaymentMethod.CREDIT_CARD,
-      cardNumber,
-      cardExpiry,
-      cardCVC,
-      "",
-      "",
-      "",
-    );
+    const paymentId = paymentsService.payWithCard(this.booking, cardNumber, cardExpiry, cardCVC);
     return paymentId;
   }
 
